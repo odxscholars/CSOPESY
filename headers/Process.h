@@ -1,10 +1,12 @@
 //
 // Created by shem on 11/6/24.
 //
+
+// TODO: [Screen -s] When process is finished and user exits, delete the process
 #include<iostream>
 #ifndef PROCESS_H
 #define PROCESS_H
-
+#include<ctime>
 class Process {
 public:
     explicit Process(std::string processName);
@@ -27,8 +29,16 @@ public:
     int getInstructionsTotal() const;
 
 
+    std::time_t startTime;
+    std::time_t endTime;
+
+
+
+
 
 private:
+
+
 
     std::string processName;
     int coreAssigned = -1;

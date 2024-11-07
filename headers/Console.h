@@ -17,6 +17,7 @@ class Console {
         void displayMainMenu();
         void processCommand(const std::string &command);
         std::vector<Process*> * processVector = new std::vector<Process*>;
+        std::vector<Core> * coreVector;
         Scheduler* scheduler;
 
 private:

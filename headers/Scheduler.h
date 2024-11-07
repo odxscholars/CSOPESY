@@ -9,18 +9,17 @@
 #include <condition_variable>
 #include "Process.h"
 #include "Config.h"
+struct Core {
+    std::thread* thread;
+    Process* process;
+    bool isRunning = false;
+    bool isIdle = false;
 
+
+};
 class Scheduler {
 public:
-    struct Core {
-        //it should contain a thread pointer, a process pointer, and boolean flags
-        std::thread* thread;
-        Process* process;
-        bool isRunning = false;
-        bool isIdle = false;
 
-
-    };
 
     Scheduler(Config config, std::vector<Process*>* processVector);
 
@@ -31,6 +30,8 @@ public:
     void startThreads();
 
     void taskManager();
+
+    std::vector<Core> *getCoreVector();
 
 private:
     std::queue<Process *> readyQueue;
@@ -52,9 +53,7 @@ private:
 
     std::thread generateThread;
 
-    std::vector<std::string> cpuStatus;
-    std::vector<int> currentInstructions;
-    std::vector<int> totalInstructions;
+
     std::vector<Process *> finishedProcesses;
 };
 

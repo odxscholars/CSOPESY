@@ -18,7 +18,11 @@
 #include <ctime>
 #include <iomanip>
 #include "headers/Config.h"
-
+#include "headers/Scheduler.h"
+//TODO: Implement report-util
+//TODO: Implement Screen commands handling
+//TODO: Implement process-smi
+//TODO: Implement memory manager
 
 void Console::startConsole()
 {
@@ -97,14 +101,15 @@ void Console::processCommand(const std::string &command) {
     if (command == "initialize") {
         Config loadedConfig("config.txt");
         loadedConfig.loadConfig();
-        scheduler = new Scheduler(loadedConfig, processVector);
+        scheduler = new Scheduler(loadedConfig, processVector); //IMPORTANT: ProcessVector is a pointer to the processVector in Console
         loadedConfig.displayConfig();
         isInitialized = true;
         std::cout << "Initialized using config.txt\n";
-        // scheduler->displayConfig();
+        this->coreVector = scheduler->getCoreVector(); // IMPORTANT: This is a pointer to the coreVector in Scheduler
     } else if (cmd == "screen") {
         // ScreenCommand screenCommand(scheduler);
         if (option == "-ls") {
+
             // screenCommand.listScreens();
         } else {
             // screenCommand.processScreenCommand(option, screenName);
