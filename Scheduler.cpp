@@ -5,7 +5,7 @@
 #include <chrono>
 #include <thread>
 
-Scheduler::Scheduler(Config config, std::vector<Process>* processVector) {
+Scheduler::Scheduler(Config config, std::vector<Process*>* processVector) {
     numCores = config.getNumCpu();
     schedulingAlgorithm = config.getScheduler();
     quantumCycles = config.getQuantumCycles();
@@ -28,31 +28,28 @@ Scheduler::Scheduler(Config config, std::vector<Process>* processVector) {
     }
 }
 
-void Scheduler::addProcessToReadyQueue(const Process &process) {
+void Scheduler::addProcessToReadyQueue( Process * process) {
     {
         std::lock_guard<std::mutex> lock(mtx);
         readyQueue.push(process);
     }
     cv.notify_one(); // Notify outside the lock
 }
-
 void Scheduler::generateDummyProcesses() {
     while (schedulerTestRunning) {
-
         int generatedInstructions = rand() % (maxInstructions - minimumInstructions + 1) + minimumInstructions;
-        Process newProcess("Process " + std::to_string(processCounter));
-        newProcess.setInstructionsTotal(generatedInstructions);
-        newProcess.setWaiting(true);
+        Process* newProcess = new Process("Process_" + std::to_string(processCounter));
+        newProcess->setInstructionsTotal(generatedInstructions);
+        newProcess->setWaiting(true);
+        // Print process name and memory address
+        std::cout << "Generated Process: " << newProcess->getProcessName() << " with " << newProcess << std::endl;
 
         {
             std::lock_guard<std::mutex> lock(mtx);
             processVector->push_back(newProcess);
         }
 
-        Process &processInVector = processVector->back();
-
-        addProcessToReadyQueue(processInVector);
-
+        addProcessToReadyQueue(newProcess);
 
         processCounter++;
         std::this_thread::sleep_for(std::chrono::milliseconds(batchProcessFrequency));
@@ -61,7 +58,7 @@ void Scheduler::generateDummyProcesses() {
 
 void Scheduler::runFCFSScheduler(int cpuIndex) {
     while (schedulerTestRunning || !readyQueue.empty()) {
-        Process currentProcess("");
+        Process* currentProcess;
         {
             std::unique_lock<std::mutex> lock(mtx);
             cv.wait(lock, [this] { return !readyQueue.empty() || !schedulerTestRunning; });
@@ -73,31 +70,33 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
             currentProcess = readyQueue.front();
             readyQueue.pop();
         }
+        // std::cout << "Current Process: " << currentProcess->getProcessName() << " Address:" << currentProcess << std::endl;
+        // std::cout << "ProcessVector Process Name: " << (*processVector)[0]->getProcessName() << " Address: " << (*processVector)[0] << std::endl;
 
-        coreVector[cpuIndex].process = &currentProcess;
-        currentProcess.setCoreAssigned(cpuIndex);
-        currentProcess.setWaiting(false);
-        currentProcess.setRunning(true);
+        coreVector[cpuIndex].process = currentProcess;
+        currentProcess->setCoreAssigned(cpuIndex);
+        currentProcess->setRunning(true);
+        currentProcess->setWaiting(false);
 
-        int instructions = currentProcess.getInstructionsTotal();
+        int instructions = currentProcess->getInstructionsTotal();
         totalInstructions[cpuIndex] = instructions;
         currentInstructions[cpuIndex] = 0;
 
         // FCFS scheduling logic
         for (int i = 0; i < instructions; ++i) {
             currentInstructions[cpuIndex] = i + 1;
-            currentProcess.setInstructionsDone(i + 1);
+            currentProcess->setInstructionsDone(i + 1);
             std::this_thread::sleep_for(std::chrono::milliseconds(delaysPerExecution));
         }
 
-        std::cout << "CPU " << cpuIndex << " processed " << currentProcess.getProcessName() << " for " << instructions <<
+        std::cout << "CPU " << cpuIndex << " processed " << currentProcess->getProcessName() << " for " << instructions <<
                   " instructions.\n";
 
         cpuStatus[cpuIndex] = "";
         currentInstructions[cpuIndex] = 0;
         totalInstructions[cpuIndex] = 0;
 
-        finishedProcesses.push_back(currentProcess.getProcessName());
+        finishedProcesses.push_back(currentProcess->getProcessName());
     }
 }
 
@@ -113,34 +112,16 @@ void Scheduler::startThreads() {
     }
 
     //start the task manager thread
-    std::thread taskManagerThread(&Scheduler::taskManager, this);
-    taskManagerThread.detach();
-
-
+    // std::thread taskManagerThread(&Scheduler::taskManager, this);
+    // taskManagerThread.detach();
 }
 
 void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            std::cout << "Ready Queue: ";
-            std::queue<Process> tempQueue = readyQueue;
-            while (!tempQueue.empty()) {
-                std::cout << tempQueue.front().getProcessName() << " ";
-                tempQueue.pop();
-            }
-            std::cout << std::endl;
-
-            for (int i = 0; i < numCores; ++i) {
-                std::cout << "Core " << i << ": ";
-                if (cpuStatus[i].empty()) {
-                    std::cout << "Idle";
-                } else {
-                    std::cout << cpuStatus[i] << " ("
-                              << currentInstructions[i] << "/"
-                              << totalInstructions[i] << ")";
-                }
-                std::cout << std::endl;
+            std::cout << "Ready Queue:" << std::endl;
+            for (auto &process : *processVector) {
+                std::cout << process->getProcessName() << " " << process << std::endl;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(300));

@@ -97,7 +97,7 @@ void Console::processCommand(const std::string &command) {
     if (command == "initialize") {
         Config loadedConfig("config.txt");
         loadedConfig.loadConfig();
-        scheduler = new Scheduler(loadedConfig, &processVector);
+        scheduler = new Scheduler(loadedConfig, processVector);
         loadedConfig.displayConfig();
         isInitialized = true;
         std::cout << "Initialized using config.txt\n";

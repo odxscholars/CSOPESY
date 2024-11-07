@@ -22,9 +22,9 @@ public:
 
     };
 
-    Scheduler(Config config, std::vector<Process>* processVector);
+    Scheduler(Config config, std::vector<Process*>* processVector);
 
-    void addProcessToReadyQueue(const Process &process);
+    void addProcessToReadyQueue(Process *process);
     void generateDummyProcesses();
     void startSchedulerTest();
     void runFCFSScheduler(int cpuIndex);
@@ -33,8 +33,8 @@ public:
     void taskManager();
 
 private:
-    std::queue<Process> readyQueue;
-    std::vector<Process>* processVector;
+    std::queue<Process *> readyQueue;
+    std::vector<Process *> * processVector;
     std::vector <Core> coreVector;
     int numCores;
     std::string schedulingAlgorithm;
