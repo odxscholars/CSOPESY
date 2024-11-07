@@ -34,6 +34,8 @@ public:
 
     void taskManager();
 
+    void listScreens();
+
     std::vector<Core> *getCoreVector();
 
 private:

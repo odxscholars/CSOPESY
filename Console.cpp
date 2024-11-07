@@ -109,7 +109,7 @@ void Console::processCommand(const std::string &command) {
     } else if (cmd == "screen") {
         // ScreenCommand screenCommand(scheduler);
         if (option == "-ls") {
-
+            scheduler->listScreens();
             // screenCommand.listScreens();
         } else {
             // screenCommand.processScreenCommand(option, screenName);
