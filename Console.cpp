@@ -26,17 +26,10 @@
 
 void Console::startConsole()
 {
-
-
     displayMainMenu();
     int cpuCycles = 0;
     // Get the input command for main menu
     std::string command;
-
-
-
-
-
     while (true)
     {
         std::cout << "\nEnter command: ";
@@ -90,6 +83,7 @@ void Console::processCommand(const std::string &command) {
     std::stringstream ss(command);
     std::string cmd, option, screenName;
     ss >> cmd >> option >> screenName;
+    // bool started = false;
 
     // static Scheduler* scheduler = nullptr;
 
@@ -109,8 +103,43 @@ void Console::processCommand(const std::string &command) {
     } else if (cmd == "screen") {
         // ScreenCommand screenCommand(scheduler);
         if (option == "-ls") {
-
-            // screenCommand.listScreens();
+            //TODO: Print something different when the scheduler hasn't started
+            std::cout << "-----------------------------------------------------------\n";
+            // if(!started) {
+            //     std::cout << "Nothing to see here!\n";
+            // } else {
+                std::cout << "Running Processes: \n";
+                for(const auto& process : *processVector) {
+                    if(process->getRunning() == true) {
+                        std::cout << process->getProcessName()
+                            << "\t("
+                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
+                            << ")\t Core: "
+                            << process->getCoreAssigned()
+                            << "\t "
+                            << process->getInstructionsDone()
+                            << "/"
+                            << process->getInstructionsTotal()
+                            << "\n";
+                    }
+                }
+            
+                std::cout << "\n\nFinished Processes: \n";
+                for(const auto& process : *processVector) {
+                    if(process->getDone() == true) {
+                        std::cout << process->getProcessName()
+                            << "\t ("
+                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
+                            << ")\t Status: Finished"
+                            << "\t "
+                            << process->getInstructionsDone()
+                            << "/"
+                            << process->getInstructionsTotal()
+                            << "\n";
+                    }
+                }
+            // }
+            std::cout << "-----------------------------------------------------------\n";
         } else {
             // screenCommand.processScreenCommand(option, screenName);
         }
