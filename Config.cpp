@@ -26,6 +26,7 @@ void Config::parseLine(const std::string &line) {
                 numCpu = std::stoi(value);
             } else if (key == "scheduler") {
                 // Remove quotes from the scheduler value
+
                 scheduler = value.substr(1, value.size() - 2);
             } else if (key == "quantum-cycles") {
                 quantumCycles = std::stoi(value);

@@ -96,7 +96,15 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
         currentInstructions[cpuIndex] = 0;
         totalInstructions[cpuIndex] = 0;
 
-        finishedProcesses.push_back(currentProcess->getProcessName());
+
+        currentProcess->setRunning(false);
+        currentProcess->setDone(true);
+        coreVector[cpuIndex].process = nullptr;
+        coreVector[cpuIndex].isIdle = true;
+        coreVector[cpuIndex].isRunning = false;
+
+
+        finishedProcesses.push_back(currentProcess);
     }
 }
 
@@ -112,17 +120,40 @@ void Scheduler::startThreads() {
     }
 
     //start the task manager thread
-    // std::thread taskManagerThread(&Scheduler::taskManager, this);
-    // taskManagerThread.detach();
+    std::thread taskManagerThread(&Scheduler::taskManager, this);
+    taskManagerThread.detach();
 }
 
 void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
             std::cout << "Ready Queue:" << std::endl;
-            for (auto &process : *processVector) {
-                std::cout << process->getProcessName() << " " << process << std::endl;
+            //print ready queue
+            std::queue<Process *> tempQueue = readyQueue;
+            while (!tempQueue.empty()) {
+                std::cout << tempQueue.front()->getProcessName() <<  std::endl;
+                tempQueue.pop();
             }
+            //print a divider
+            std::cout << "----------------" << std::endl;
+
+
+
+            //iterate through the coreVector and print the process name and instructions done
+            for (int i = 0; i < numCores; ++i) {
+                if (coreVector[i].process != nullptr) {
+                    std::cout << "CPU " << i << " " << coreVector[i].process->getProcessName() << " " << currentInstructions[i] << "/" << totalInstructions[i] << std::endl;
+                }else {
+                    //print idle
+                    std::cout << "CPU " << i << " Idle" << std::endl;
+                }
+            }
+            std::cout << "----------------" << std::endl;
+            std::cout << "Finished Processes:" << std::endl;
+            for (auto &process : finishedProcesses) {
+                std::cout << process->getProcessName() << " " << process->getInstructionsDone() << "/" << process->getInstructionsTotal() << std::endl;
+            }
+            std::cout << "----------------" << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }

@@ -55,7 +55,7 @@ private:
     std::vector<std::string> cpuStatus;
     std::vector<int> currentInstructions;
     std::vector<int> totalInstructions;
-    std::vector<std::string> finishedProcesses;
+    std::vector<Process *> finishedProcesses;
 };
 
 #endif //SCHEDULER_H
