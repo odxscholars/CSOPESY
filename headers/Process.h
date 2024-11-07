@@ -29,8 +29,8 @@ public:
     int getInstructionsTotal() const;
 
 
-    std::time_t startTime;
-    std::time_t endTime;
+    std::time_t startTime = 0 ;
+    std::time_t endTime = 0;
 
 
 
