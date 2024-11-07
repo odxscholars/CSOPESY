@@ -38,6 +38,8 @@ public:
 
     std::vector<Core> *getCoreVector();
 
+    int globalExecDelay = 0;
+
 private:
     std::queue<Process *> readyQueue;
     std::vector<Process *> * processVector;
