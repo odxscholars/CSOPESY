@@ -12,6 +12,16 @@
 
 class Scheduler {
 public:
+    struct Core {
+        //it should contain a thread pointer, a process pointer, and boolean flags
+        std::thread* thread;
+        Process* process;
+        bool isRunning = false;
+        bool isIdle = false;
+
+
+    };
+
     Scheduler(Config config, std::vector<Process>* processVector);
 
     void addProcessToReadyQueue(const Process &process);
@@ -25,6 +35,7 @@ public:
 private:
     std::queue<Process> readyQueue;
     std::vector<Process>* processVector;
+    std::vector <Core> coreVector;
     int numCores;
     std::string schedulingAlgorithm;
     int quantumCycles;
@@ -38,7 +49,7 @@ private:
 
     std::mutex mtx;
     std::condition_variable cv;
-    std::vector<std::thread> threadVector;
+
     std::thread generateThread;
 
     std::vector<std::string> cpuStatus;

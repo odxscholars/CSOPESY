@@ -18,6 +18,14 @@ Scheduler::Scheduler(Config config, std::vector<Process>* processVector) {
     cpuStatus.resize(numCores, "");
     currentInstructions.resize(numCores, 0);
     totalInstructions.resize(numCores, 0);
+    coreVector.resize(numCores);
+    // Initialize the coreVector
+    for (int i = 0; i < numCores; ++i) {
+        coreVector[i].isIdle = true;
+        coreVector[i].isRunning = false;
+        coreVector[i].process = nullptr;
+        coreVector[i].thread = nullptr;
+    }
 }
 
 void Scheduler::addProcessToReadyQueue(const Process &process) {
@@ -66,7 +74,7 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
             readyQueue.pop();
         }
 
-        cpuStatus[cpuIndex] = currentProcess.getProcessName();
+        coreVector[cpuIndex].process = &currentProcess;
         currentProcess.setCoreAssigned(cpuIndex);
         currentProcess.setWaiting(false);
         currentProcess.setRunning(true);
@@ -98,16 +106,17 @@ void Scheduler::startThreads() {
     generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
     generateThread.detach();
 
-    // Start threads for the CPU cores running the FCFS scheduler
+    //start the core threads from coreVector
     for (int i = 0; i < numCores; ++i) {
-        threadVector.emplace_back(&Scheduler::runFCFSScheduler, this, i);
+        coreVector[i].thread = new std::thread(&Scheduler::runFCFSScheduler, this, i);
+        coreVector[i].thread->detach();
     }
 
-    for (auto &thread: threadVector) {
-        thread.detach();
-    }
+    //start the task manager thread
     std::thread taskManagerThread(&Scheduler::taskManager, this);
     taskManagerThread.detach();
+
+
 }
 
 void Scheduler::taskManager() {
