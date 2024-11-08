@@ -40,7 +40,14 @@ void Config::parseLine(const std::string &line) {
                 maxIns = std::stoi(value);
             } else if (key == "delay-per-exec") {
                 delaysPerExec = std::stoi(value);
+            }else if (key == "max-overall-mem") {
+                maxOverallMemory = std::stoi(value);
+            } else if (key == "mem-per-frame") {
+                memoryPerFrame = std::stoi(value);
+            } else if (key == "mem-per-proc") {
+                memoryPerProcess = std::stoi(value);
             }
+
         }
     }
 }
@@ -52,6 +59,9 @@ void Config::displayConfig() const {
     std::cout << "Minimum Instructions: " << minIns << std::endl;
     std::cout << "Maximum Instructions: " << maxIns << std::endl;
     std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
+    std::cout << "Max Overall Memory: " << maxOverallMemory << std::endl;
+    std::cout << "Memory Per Frame: " << memoryPerFrame << std::endl;
+    std::cout << "Memory Per Process: " << memoryPerProcess << std::endl;
 }
 int Config::getNumCpu() const {
     return numCpu;

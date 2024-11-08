@@ -108,9 +108,9 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
     }
 }
 void Scheduler::runRR(int cpuIndex) {
+    Process* currentProcess;
     while (schedulerTestRunning || !readyQueue.empty()) {
-        Process* currentProcess;
-        {
+        if (currentProcess == nullptr) {
             std::unique_lock<std::mutex> lock(mtx);
             cv.wait(lock, [this] { return !readyQueue.empty() || !schedulerTestRunning; });
 
@@ -154,13 +154,25 @@ void Scheduler::runRR(int cpuIndex) {
             coreVector[cpuIndex].isIdle = true;
             coreVector[cpuIndex].isRunning = false;
             finishedProcesses.push_back(currentProcess);
+            currentProcess = nullptr;
         }
 
         // Case 2: Process is not done
         else {
-            currentProcess->setRunning(false);
-            currentProcess->setWaiting(true);
-            addProcessToReadyQueue(currentProcess);
+            //check if the ready queue is empty
+               // if ready queue is empty, keep executing
+            if (!readyQueue.empty()) {
+                currentProcess->setRunning(false);
+                currentProcess->setWaiting(true);
+                coreVector[cpuIndex].process = nullptr;
+                coreVector[cpuIndex].isIdle = true;
+                coreVector[cpuIndex].isRunning = false;
+                addProcessToReadyQueue(currentProcess);
+                currentProcess = nullptr;
+            }else {
+
+            }
+
         }
     }
 }

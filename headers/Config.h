@@ -28,6 +28,10 @@ private:
     int minIns;
     int maxIns;
     int delaysPerExec;
+    int maxOverallMemory;
+    int memoryPerFrame;
+    int memoryPerProcess;
+
 
     void parseLine(const std::string &line);
 
