@@ -91,11 +91,6 @@ void Console::displayMainMenu() {
 
 
 void Console::processCommand(const std::string &command) {
-<<<<<<< Updated upstream
-    std::stringstream ss(command);
-    std::string cmd, option, screenName;
-    ss >> cmd >> option >> screenName;
-=======
     // std::stringstream ss(command);
     // std::string cmd, option, screenName;
     // ss >> cmd >> option >> screenName;
@@ -104,7 +99,6 @@ void Console::processCommand(const std::string &command) {
     std::string cmd, option, processName;
     iss >> cmd >> option;
     // bool started = false;
->>>>>>> Stashed changes
 
     // static Scheduler* scheduler = nullptr;
 
@@ -158,11 +152,6 @@ void Console::processCommand(const std::string &command) {
                     << " and " << instructionsTotal << " instructions." << std::endl;
         }
         // ScreenCommand screenCommand(scheduler);
-<<<<<<< Updated upstream
-        if (option == "-ls") {
-            scheduler->listScreens();
-            // screenCommand.listScreens();
-=======
         else if (option == "-ls") {
             //TODO: Print something different when the scheduler hasn't started
             std::cout << "-----------------------------------------------------------\n";
@@ -201,7 +190,6 @@ void Console::processCommand(const std::string &command) {
                 }
             // }
             std::cout << "-----------------------------------------------------------\n";
->>>>>>> Stashed changes
         } else {
             // screenCommand.processScreenCommand(option, screenName);
         }
