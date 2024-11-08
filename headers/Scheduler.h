@@ -27,6 +27,7 @@ public:
     void generateDummyProcesses();
     void startSchedulerTest();
     void runFCFSScheduler(int cpuIndex);
+    void addProcess(Process* process);
 
     void runRR(int cpuIndex);
 

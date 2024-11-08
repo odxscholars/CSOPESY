@@ -16,6 +16,7 @@ class Console {
         void clearScreen();
         void displayMainMenu();
         void processCommand(const std::string &command);
+        void generateRandomInstructions();
         std::vector<Process*> * processVector = new std::vector<Process*>;
         std::vector<Core> * coreVector;
         Scheduler* scheduler;

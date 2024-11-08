@@ -24,6 +24,10 @@
 //TODO: Implement process-smi
 //TODO: Implement memory manager
 
+#include <algorithm> 
+#include <random>     
+#include <sstream>   
+
 void Console::startConsole()
 {
 
@@ -87,9 +91,20 @@ void Console::displayMainMenu() {
 
 
 void Console::processCommand(const std::string &command) {
+<<<<<<< Updated upstream
     std::stringstream ss(command);
     std::string cmd, option, screenName;
     ss >> cmd >> option >> screenName;
+=======
+    // std::stringstream ss(command);
+    // std::string cmd, option, screenName;
+    // ss >> cmd >> option >> screenName;
+
+    std::istringstream iss(command);
+    std::string cmd, option, processName;
+    iss >> cmd >> option;
+    // bool started = false;
+>>>>>>> Stashed changes
 
     // static Scheduler* scheduler = nullptr;
 
@@ -107,10 +122,86 @@ void Console::processCommand(const std::string &command) {
         std::cout << "Initialized using config.txt\n";
         this->coreVector = scheduler->getCoreVector(); // IMPORTANT: This is a pointer to the coreVector in Scheduler
     } else if (cmd == "screen") {
+
+        if (option == "-s") {
+        iss >> processName;
+
+            // Check lang if this exists na
+            if (std::any_of(processVector->begin(), processVector->end(), [&](const Process* p) {
+                return p->getProcessName() == processName;
+            })) {
+                std::cout << "Process name \"" << processName << "\" already exists." << std::endl;
+                return;
+            }
+
+            Config loadedConfig("config.txt");
+            loadedConfig.loadConfig();
+
+            int minInstructions = loadedConfig.getMinIns();
+            int maxInstructions = loadedConfig.getMaxIns();
+
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<int> distr(minInstructions, maxInstructions);
+            int instructionsTotal = distr(gen);
+
+            // generate new process
+            Process* newProcess = new Process(processName);
+            newProcess->setInstructionsDone(instructionsTotal);  
+            newProcess->setProcessNameID(static_cast<int>(processVector->size()) + 1); 
+
+            // Add to processVector and scheduler
+            processVector->push_back(newProcess);
+            scheduler->addProcess(newProcess);
+
+            std::cout << "New process \"" << processName << "\" created with ID " << newProcess->getProcessNameID()
+                    << " and " << instructionsTotal << " instructions." << std::endl;
+        }
         // ScreenCommand screenCommand(scheduler);
+<<<<<<< Updated upstream
         if (option == "-ls") {
             scheduler->listScreens();
             // screenCommand.listScreens();
+=======
+        else if (option == "-ls") {
+            //TODO: Print something different when the scheduler hasn't started
+            std::cout << "-----------------------------------------------------------\n";
+            // if(!started) {
+            //     std::cout << "Nothing to see here!\n";
+            // } else {
+                std::cout << "Running Processes: \n";
+                for(const auto& process : *processVector) {
+                    if(process->getRunning() == true) {
+                        std::cout << process->getProcessName()
+                            << "\t("
+                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
+                            << ")\t Core: "
+                            << process->getCoreAssigned()
+                            << "\t "
+                            << process->getInstructionsDone()
+                            << "/"
+                            << process->getInstructionsTotal()
+                            << "\n";
+                    }
+                }
+            
+                std::cout << "\n\nFinished Processes: \n";
+                for(const auto& process : *processVector) {
+                    if(process->getDone() == true) {
+                        std::cout << process->getProcessName()
+                            << "\t ("
+                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
+                            << ")\t Status: Finished"
+                            << "\t "
+                            << process->getInstructionsDone()
+                            << "/"
+                            << process->getInstructionsTotal()
+                            << "\n";
+                    }
+                }
+            // }
+            std::cout << "-----------------------------------------------------------\n";
+>>>>>>> Stashed changes
         } else {
             // screenCommand.processScreenCommand(option, screenName);
         }

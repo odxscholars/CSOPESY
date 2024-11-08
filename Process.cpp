@@ -53,3 +53,11 @@ bool Process::getWaiting() const {
 int Process::getInstructionsTotal() const {
     return instructionsTotal;
 }
+
+void Process::setProcessNameID(int id) {
+    this->processNameID = id; 
+}
+
+int Process::getProcessNameID() const {
+    return this->processNameID; 
+}

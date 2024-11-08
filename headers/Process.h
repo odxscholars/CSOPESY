@@ -16,6 +16,7 @@ public:
     void setDone(bool done);
     void setRunning( bool running);
     void setWaiting( bool waiting);
+    void setProcessNameID(int id);
 
 
     void setInstructionsTotal(int instructions); //only called once
@@ -27,6 +28,7 @@ public:
     bool getRunning() const;
     bool getWaiting() const;
     int getInstructionsTotal() const;
+    int getProcessNameID() const;
 
 
     std::time_t startTime = 0 ;
@@ -39,7 +41,8 @@ public:
 private:
 
 
-
+    int processNameID;
+    
     std::string processName;
     int coreAssigned = -1;
     bool isDone = false; //when not waiting to be done by scheduler

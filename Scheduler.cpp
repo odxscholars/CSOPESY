@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 #include <iomanip>
 
@@ -31,6 +32,7 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector) {
     }
 }
 
+<<<<<<< Updated upstream
 void Scheduler::listScreens() {
     std::lock_guard<std::mutex> lock(mtx);
 
@@ -65,6 +67,29 @@ void Scheduler::listScreens() {
     std::cout << "----------------\n";
 }
 
+=======
+
+
+
+void Scheduler::addProcess(Process* process) {
+    if (coreVector.size() < numCores) {
+        // Create a Core and assign the process to it
+        Core core;
+        core.process = process;  // Assuming Core has a member `Process* process`
+        
+        // Add the Core with the process to coreVector
+        coreVector.push_back(core);
+        std::cout << "Process assigned to a core.\n";
+    } else {
+        std::cout << "All cores occupied. Process added to queue.\n";
+        
+        // Add the process to readyQueue if no core is available
+        readyQueue.push(process);
+    }
+}
+
+
+>>>>>>> Stashed changes
 void Scheduler::addProcessToReadyQueue( Process * process) {
     {
         std::lock_guard<std::mutex> lock(mtx);
@@ -72,6 +97,7 @@ void Scheduler::addProcessToReadyQueue( Process * process) {
     }
     cv.notify_one(); // Notify outside the lock
 }
+
 void Scheduler::generateDummyProcesses() {
     while (schedulerTestRunning) {
         int generatedInstructions = rand() % (maxInstructions - minimumInstructions + 1) + minimumInstructions;
