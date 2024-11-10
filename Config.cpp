@@ -40,7 +40,14 @@ void Config::parseLine(const std::string &line) {
                 maxIns = std::stoi(value);
             } else if (key == "delay-per-exec") {
                 delaysPerExec = std::stoi(value);
+            } else if (key == "max-overall-mem") {
+                maxOverallMem = std::stoi(value);
+            } else if (key == "mem-per-frame") {
+                memPerFrame = std::stoi(value);
+            } else if (key == "mem-per-proc") {
+                memPerProcess = std::stoi(value);
             }
+        
         }
     }
 }
@@ -52,6 +59,12 @@ void Config::displayConfig() const {
     std::cout << "Minimum Instructions: " << minIns << std::endl;
     std::cout << "Maximum Instructions: " << maxIns << std::endl;
     std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
+
+    // Memory 
+    std::cout << "Max Overall Memory: " << maxOverallMem << std::endl;
+    std::cout << "Memory per Frame: " << memPerFrame << std::endl;
+    std::cout << "Memory per Process: " << memPerProcess << std::endl;
+
 }
 int Config::getNumCpu() const {
     return numCpu;
@@ -79,4 +92,18 @@ int Config::getMaxIns() const {
 
 int Config::getDelaysPerExec() const {
     return delaysPerExec;
+}
+
+// get memory configurations
+
+int Config::getMaxOverallMem() const {
+    return maxOverallMem;
+}
+
+int Config::getMemPerFrame() const {
+    return memPerFrame;
+}
+
+int Config::getMemPerProcess() const {
+    return memPerProcess;
 }

@@ -19,6 +19,12 @@ public:
     int getMaxIns() const;
     int getDelaysPerExec() const;
 
+    // Newly added configurations for memory 
+    int getMaxOverallMem() const;
+    int getMemPerFrame() const;
+    int getMemPerProcess() const;
+
+
 private:
     std::string filename;
     int numCpu;
@@ -28,6 +34,11 @@ private:
     int minIns;
     int maxIns;
     int delaysPerExec;
+
+    // Memory
+    int maxOverallMem;
+    int memPerFrame;
+    int memPerProcess;
 
     void parseLine(const std::string &line);
 
