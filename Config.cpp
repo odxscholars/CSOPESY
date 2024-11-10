@@ -90,3 +90,15 @@ int Config::getMaxIns() const {
 int Config::getDelaysPerExec() const {
     return delaysPerExec;
 }
+
+int Config::getMaxOverallMemory() const {
+    return maxOverallMemory;
+}
+
+int Config::getMemoryPerFrame() const {
+    return memoryPerFrame;
+}
+
+int Config::getMemoryPerProcess() const {
+    return memoryPerProcess;
+}

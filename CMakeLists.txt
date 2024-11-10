@@ -11,4 +11,6 @@ add_executable(ownImplementation main.cpp
         Process.cpp
         headers/Process.h
         headers/Scheduler.h
-        Scheduler.cpp)
+        Scheduler.cpp
+        headers/MemoryManager.h
+        MemoryManager.cpp)

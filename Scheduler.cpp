@@ -6,7 +6,8 @@
 #include <chrono>
 #include <thread>
 
-Scheduler::Scheduler(Config config, std::vector<Process*>* processVector) {
+Scheduler::Scheduler(Config config, std::vector<Process*>* processVector)
+    : memoryManager(config.getMaxOverallMemory(), config.getMemoryPerFrame(), config.getMemoryPerProcess()) {
     numCores = config.getNumCpu();
     schedulingAlgorithm = config.getScheduler();
     quantumCycles = config.getQuantumCycles();
@@ -15,12 +16,9 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector) {
     maxInstructions = config.getMaxIns();
     delaysPerExecution = config.getDelaysPerExec();
     this->processVector = processVector;
-    this->globalExecDelay = (delaysPerExecution + 1) * 100; //IMPORTANT: This is the delay for each instruction execution
-
-
+    this->globalExecDelay = (delaysPerExecution + 1) * 100;
 
     coreVector.resize(numCores);
-    // Initialize the coreVector
     for (int i = 0; i < numCores; ++i) {
         coreVector[i].isIdle = true;
         coreVector[i].isRunning = false;
@@ -108,7 +106,7 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
     }
 }
 void Scheduler::runRR(int cpuIndex) {
-    Process* currentProcess;
+    Process* currentProcess = nullptr;
     while (schedulerTestRunning || !readyQueue.empty()) {
         if (currentProcess == nullptr) {
             std::unique_lock<std::mutex> lock(mtx);
@@ -119,9 +117,17 @@ void Scheduler::runRR(int cpuIndex) {
             }
 
             currentProcess = readyQueue.front();
+            std::cout << "Next Process: " << currentProcess->getProcessName() << std::endl;
             readyQueue.pop();
         }
 
+        if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
+            std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
+            addProcessToReadyQueue(currentProcess);
+            currentProcess = nullptr;
+            continue;
+        }
+        std::cout << "pass" << std::endl;
         coreVector[cpuIndex].process = currentProcess;
         coreVector[cpuIndex].isIdle = false;
         coreVector[cpuIndex].isRunning = true;
@@ -144,8 +150,6 @@ void Scheduler::runRR(int cpuIndex) {
             std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
         }
 
-
-        // Case 1: Process is done
         if (currentProcess->getInstructionsDone() == instructions) {
             currentProcess->endTime = std::time(nullptr);
             currentProcess->setRunning(false);
@@ -153,14 +157,10 @@ void Scheduler::runRR(int cpuIndex) {
             coreVector[cpuIndex].process = nullptr;
             coreVector[cpuIndex].isIdle = true;
             coreVector[cpuIndex].isRunning = false;
+            memoryManager.deallocateMemory(currentProcess->getProcessName());
             finishedProcesses.push_back(currentProcess);
             currentProcess = nullptr;
-        }
-
-        // Case 2: Process is not done
-        else {
-            //check if the ready queue is empty
-               // if ready queue is empty, keep executing
+        } else {
             if (!readyQueue.empty()) {
                 currentProcess->setRunning(false);
                 currentProcess->setWaiting(true);
@@ -169,10 +169,7 @@ void Scheduler::runRR(int cpuIndex) {
                 coreVector[cpuIndex].isRunning = false;
                 addProcessToReadyQueue(currentProcess);
                 currentProcess = nullptr;
-            }else {
-
             }
-
         }
     }
 }
@@ -202,23 +199,17 @@ void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
             std::cout << "Ready Queue:" << std::endl;
-            //print ready queue
-            std::queue<Process *> tempQueue = readyQueue;
+            std::queue<Process*> tempQueue = readyQueue;
             while (!tempQueue.empty()) {
-                std::cout << tempQueue.front()->getProcessName() <<  std::endl;
+                std::cout << tempQueue.front()->getProcessName() << std::endl;
                 tempQueue.pop();
             }
-            //print a divider
             std::cout << "----------------" << std::endl;
 
-
-
-            //iterate through the coreVector and print the process name and instructions done
             for (int i = 0; i < numCores; ++i) {
                 if (coreVector[i].process != nullptr) {
                     std::cout << "CPU " << i << " " << coreVector[i].process->getProcessName() << " " << std::put_time(std::localtime(&coreVector[i].process->startTime), "%Y-%m-%d %H:%M:%S") << " " << coreVector[i].process->getInstructionsDone() << "/" << coreVector[i].process->getInstructionsTotal() << std::endl;
-                }else {
-                    //print idle
+                } else {
                     std::cout << "CPU " << i << " Idle" << std::endl;
                 }
             }
@@ -229,6 +220,8 @@ void Scheduler::taskManager() {
             }
             std::cout << "----------------" << std::endl;
         }
+        memoryManager.generateReport("report.txt");
+        memoryManager.VisualizeMemory();
         std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
     }
 }

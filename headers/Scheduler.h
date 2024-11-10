@@ -1,14 +1,14 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
+#include "Config.h"
+#include "Process.h"
+#include "MemoryManager.h"
 #include <vector>
 #include <queue>
-#include <string>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "Process.h"
-#include "Config.h"
 struct Core {
     std::thread* thread;
     Process* process;
@@ -19,29 +19,18 @@ struct Core {
 };
 class Scheduler {
 public:
-
-
     Scheduler(Config config, std::vector<Process*>* processVector);
-
-    void addProcessToReadyQueue(Process *process);
-    void generateDummyProcesses();
+    void addProcessToReadyQueue(Process* process);
     void startSchedulerTest();
-    void runFCFSScheduler(int cpuIndex);
-
-    void runRR(int cpuIndex);
-
-    void startThreads();
-
-    void taskManager();
-
-    std::vector<Core> *getCoreVector();
-
-    int globalExecDelay = 0;
+    std::vector<Core>* getCoreVector();
 
 private:
-    std::queue<Process *> readyQueue;
-    std::vector<Process *> * processVector;
-    std::vector <Core> coreVector;
+    void generateDummyProcesses();
+    void runFCFSScheduler(int cpuIndex);
+    void runRR(int cpuIndex);
+    void startThreads();
+    void taskManager();
+
     int numCores;
     std::string schedulingAlgorithm;
     int quantumCycles;
@@ -49,17 +38,18 @@ private:
     int minimumInstructions;
     int maxInstructions;
     int delaysPerExecution;
-
+    int globalExecDelay;
     bool schedulerTestRunning = false;
     int processCounter = 0;
 
+    std::vector<Core> coreVector;
+    std::vector<Process*>* processVector;
+    std::queue<Process*> readyQueue;
+    std::vector<Process*> finishedProcesses;
     std::mutex mtx;
     std::condition_variable cv;
-
     std::thread generateThread;
-
-
-    std::vector<Process *> finishedProcesses;
+    MemoryManager memoryManager;
 };
 
-#endif //SCHEDULER_H
+#endif // SCHEDULER_H

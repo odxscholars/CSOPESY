@@ -22,16 +22,6 @@ void Process::setWaiting(bool waiting) {
     isWaiting = waiting;
 }
 
-void Process::setEndMemory(int memory) {
-}
-
-void Process::setStartMemory(int memory) {
-    startMemory = memory;
-}
-
-void Process::setInMemory(bool inMemory) {
-    isInMemory = inMemory;
-}
 
 void Process::setInstructionsTotal(int instructions) {
     instructionsTotal = instructions;
@@ -61,18 +51,7 @@ bool Process::getWaiting() const {
     return isWaiting;
 }
 
-bool Process::getInMemory() const {
-    return isInMemory;
-}
 
 int Process::getInstructionsTotal() const {
     return instructionsTotal;
-}
-
-int Process::getStartMemory() const {
-    return startMemory;
-}
-
-int Process::getEndMemory() const {
-    return endMemory;
 }

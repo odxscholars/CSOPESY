@@ -18,6 +18,9 @@ public:
     int getMinIns() const;
     int getMaxIns() const;
     int getDelaysPerExec() const;
+    int getMaxOverallMemory() const;
+    int getMemoryPerFrame() const;
+    int getMemoryPerProcess() const;
 
 private:
     std::string filename;
