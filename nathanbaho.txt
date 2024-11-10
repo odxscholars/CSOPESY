@@ -1,0 +1,24 @@
+CPU utilization: 0%
+Cores used: 0
+Cores available: 1
+
+Running processes:
+
+Finished processes:
+1 (11/11/2024 00:32:50)   Finished    38 / 38
+p01 (11/11/2024 00:32:50)   Finished    38 / 38
+p02 (11/11/2024 00:32:50)   Finished    38 / 38
+p03 (11/11/2024 00:32:50)   Finished    38 / 38
+p04 (11/11/2024 00:32:50)   Finished    38 / 38
+p05 (11/11/2024 00:32:50)   Finished    38 / 38
+p06 (11/11/2024 00:32:50)   Finished    38 / 38
+
+CPU utilization: 0%
+Cores used: 0
+Cores available: 2
+
+Running processes:
+
+Finished processes:
+1 (11/11/2024 01:17:21)   Finished    100 / 100
+

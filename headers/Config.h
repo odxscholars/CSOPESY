@@ -28,6 +28,10 @@ public:
     uint32_t getMinInstructions() const { return minInstructions; }
     uint32_t getMaxInstructions() const { return maxInstructions; }
     uint32_t getDelaysPerExec() const { return delaysPerExec; }
+    //week 8
+    uint16_t getMaxOverallMem() const { return maxOverallMem; }
+    uint16_t getMemPerFrame() const { return memPerFrame; }
+    uint16_t getMemPerProc() const { return memPerProc; }
 
     // Exception class for Config
     class ConfigException : public std::runtime_error
@@ -39,13 +43,18 @@ public:
 private:
     Config() : initialized(false) {}
 
-    int numCPU;                // Range: [1, 128]
-    std::string schedulerType; // fcfs or rr
-    uint32_t quantumCycles;    // Range: [1, 2^32]
-    uint32_t batchProcessFreq; // Range: [1, 2^32]
-    uint32_t minInstructions;  // Range: [1, 2^32]
-    uint32_t maxInstructions;  // Range: [1, 2^32]
-    uint32_t delaysPerExec;    // Range: [0, 2^32]
+    int numCPU;                
+    std::string schedulerType; 
+    uint32_t quantumCycles;    
+    uint32_t batchProcessFreq; 
+    uint32_t minInstructions;  
+    uint32_t maxInstructions;  
+    uint32_t delaysPerExec;    
+    //week 8
+    uint16_t maxOverallMem;    
+    uint16_t memPerFrame;      
+    uint16_t memPerProc;       
+
     bool initialized;
 
     void validateParameters();

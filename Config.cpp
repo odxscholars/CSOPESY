@@ -17,7 +17,10 @@ void Config::loadConfig(const std::string &filename)
         {"batch-process-freq", false},
         {"min-ins", false},
         {"max-ins", false},
-        {"delays-per-exec", false}};
+        {"delays-per-exec", false},
+        {"max-overall-mem", false},
+        {"mem-per-frame", false},
+        {"mem-per-proc", false}};
 
     std::string param;
     while (file >> param)
@@ -57,6 +60,21 @@ void Config::loadConfig(const std::string &filename)
             file >> delaysPerExec;
             requiredParams[param] = true;
         }
+        else if (param == "max-overall-mem")
+        {
+            file >> maxOverallMem;
+            requiredParams[param] = true;
+        }
+        else if (param == "mem-per-frame")
+        {
+            file >> memPerFrame;
+            requiredParams[param] = true;
+        }
+        else if (param == "mem-per-proc")
+        {
+            file >> memPerProc;
+            requiredParams[param] = true;
+        }
         else
         {
             throw ConfigException("Unknown parameter: " + param);
@@ -72,46 +90,7 @@ void Config::loadConfig(const std::string &filename)
         }
     }
 
-    validateParameters();
     initialized = true;
-}
-
-void Config::validateParameters()
-{
-    if (numCPU < 1 || numCPU > 128)
-    {
-        throw ConfigException("Invalid number of CPUs (must be between 1 and 128): " + std::to_string(numCPU));
-    }
-
-    if (schedulerType != "fcfs" && schedulerType != "rr")
-    {
-        throw ConfigException("Invalid scheduler type (must be either 'fcfs' or 'rr'): " + schedulerType);
-    }
-
-    if (quantumCycles < 1)
-    {
-        throw ConfigException("Invalid quantum cycles (must be at least 1): " + std::to_string(quantumCycles));
-    }
-
-    if (batchProcessFreq < 1)
-    {
-        throw ConfigException("Invalid batch process frequency (must be at least 1): " + std::to_string(batchProcessFreq));
-    }
-
-    if (minInstructions < 1)
-    {
-        throw ConfigException("Invalid minimum instructions (must be at least 1): " + std::to_string(minInstructions));
-    }
-
-    if (maxInstructions < minInstructions)
-    {
-        throw ConfigException("Invalid maximum instructions (must be greater than or equal to min-ins): " + std::to_string(maxInstructions));
-    }
-
-    if (delaysPerExec < 0)
-    {
-        throw ConfigException("Invalid delays per execution (must be non-negative): " + std::to_string(delaysPerExec));
-    }
 }
 
 void Config::displayConfig() const {
