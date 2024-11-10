@@ -35,27 +35,21 @@ private:
 
     std::atomic<bool> isInitialized{false};
 
-    // Process queues
+
     std::queue<std::shared_ptr<Process>> readyQueue;
     std::vector<std::shared_ptr<Process>> runningProcesses;
     std::vector<std::shared_ptr<Process>> finishedProcesses;
-
-    // Synchronization with timed mutexes
     mutable std::timed_mutex mutex;
     mutable std::timed_mutex syncMutex;
     std::condition_variable_any cv;
     std::condition_variable_any syncCv;
     std::atomic<int> coresWaiting{0};
     std::atomic<bool> processingActive{false};
-
-    // CPU management
     std::vector<std::thread> cpuThreads;
     std::vector<bool> coreStatus;
     std::atomic<uint64_t> cpuCycles{0};
     std::thread cycleThreadCount;
     std::atomic<bool> cycleCounter{false};
-
-    // Core methods
     void processHandler();
     std::shared_ptr<Process> nextProcess();
     std::shared_ptr<Process> RR();

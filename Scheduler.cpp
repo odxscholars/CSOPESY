@@ -10,10 +10,16 @@
 #include <ctime>
 
 
+
 Scheduler::Scheduler()
 {
     size_t numCPUs = Config::getInstance().getNumCPU();
     coreStatus.resize(numCPUs, false);
+
+    //week 8
+    size_t memPerProc = Config::getInstance().getMemPerProc();
+    size_t maxOverallMem = Config::getInstance().getMaxOverallMem();
+    size_t memPerFrame = Config::getInstance().getMemPerFrame();
 }
 
 void Scheduler::startScheduling()
@@ -69,6 +75,8 @@ void Scheduler::addProcess(std::shared_ptr<Process> process)
         cv.notify_all();
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
+    
 }
 
 

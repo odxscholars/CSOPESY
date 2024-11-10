@@ -65,9 +65,8 @@ private:
     std::vector<std::shared_ptr<CommandManager>> commandList;
     std::atomic<int> commandCounter; 
 
-    // Round Robin timing
+    // Round Robin
     std::atomic<uint32_t> quantumTime; 
-
     mutable std::mutex processMutex;
 
     int generateInstructionCount() const;

@@ -101,4 +101,7 @@ void Config::displayConfig() const {
     std::cout << "Minimum Instructions: " << minInstructions << std::endl;
     std::cout << "Maximum Instructions: " << maxInstructions << std::endl;
     std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
+    std::cout << "Max Overall Memory: " << maxOverallMem << std::endl;
+    std::cout << "Memory Per Frame: " << memPerFrame << std::endl;
+    std::cout << "Memory Per Process: " << memPerProc << std::endl;
 }
