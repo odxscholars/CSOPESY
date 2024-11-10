@@ -1,8 +1,9 @@
-#include <iostream>
 #include "headers/Console.h"
+#include <iostream>
 
-int main() {
-    Console mainConsole;
-    mainConsole.startConsole();
+int main()
+{
+    Console::getInstance().start();
+  
     return 0;
 }

@@ -1,0 +1,11 @@
+CPU utilization: 100%
+Cores used: 1
+Cores available: 0
+
+Running processes:
+p09 (11/10/2024 22:18:36)   Core: 0    2 / 38
+
+Finished processes:
+1 (11/10/2024 22:18:36)   Finished    38 / 38
+2 (11/10/2024 22:18:36)   Finished    38 / 38
+

@@ -1,82 +1,125 @@
 #include "headers/Config.h"
+#include <fstream>
+#include <iostream>
 
-Config::Config(const std::string &filename) : filename(filename) {}
-
-void Config::loadConfig() {
+void Config::loadConfig(const std::string &filename)
+{
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open config file or file does not exist");
+    if (!file.is_open())
+    {
+        throw ConfigException("Could not open config file: " + filename);
     }
 
-    std::string line;
-    while (std::getline(file, line)) {
-        parseLine(line);
-    }
-    file.close();
-}
+    std::map<std::string, bool> requiredParams = {
+        {"num-cpu", false},
+        {"scheduler", false},
+        {"quantum-cycles", false},
+        {"batch-process-freq", false},
+        {"min-ins", false},
+        {"max-ins", false},
+        {"delays-per-exec", false}};
 
-void Config::parseLine(const std::string &line) {
-    std::istringstream iss(line);
-    std::string key;
-    if (iss >> key) {
-        std::string value;
-        if (iss >> value) {
-
-            if (key == "num-cpu") {
-                numCpu = std::stoi(value);
-            } else if (key == "scheduler") {
-                if (value.front() == '\"' && value.back() == '\"') {
-                    scheduler = value.substr(1, value.size() - 2);
-                } else {
-                    scheduler = value;
-                }
-            } else if (key == "quantum-cycles") {
-                quantumCycles = std::stoi(value);
-            } else if (key == "batch-process-freq") {
-                batchProcessFreq = std::stoi(value);
-            } else if (key == "min-ins") {
-                minIns = std::stoi(value);
-            } else if (key == "max-ins") {
-                maxIns = std::stoi(value);
-            } else if (key == "delay-per-exec") {
-                delaysPerExec = std::stoi(value);
-            }
+    std::string param;
+    while (file >> param)
+    {
+        if (param == "num-cpu")
+        {
+            file >> numCPU;
+            requiredParams[param] = true;
+        }
+        else if (param == "scheduler")
+        {
+            file >> schedulerType;
+            requiredParams[param] = true;
+        }
+        else if (param == "quantum-cycles")
+        {
+            file >> quantumCycles;
+            requiredParams[param] = true;
+        }
+        else if (param == "batch-process-freq")
+        {
+            file >> batchProcessFreq;
+            requiredParams[param] = true;
+        }
+        else if (param == "min-ins")
+        {
+            file >> minInstructions;
+            requiredParams[param] = true;
+        }
+        else if (param == "max-ins")
+        {
+            file >> maxInstructions;
+            requiredParams[param] = true;
+        }
+        else if (param == "delays-per-exec")
+        {
+            file >> delaysPerExec;
+            requiredParams[param] = true;
+        }
+        else
+        {
+            throw ConfigException("Unknown parameter: " + param);
         }
     }
+
+    // Check if all required parameters were found
+    for (const auto &param : requiredParams)
+    {
+        if (!param.second)
+        {
+            throw ConfigException("Missing required parameter: " + param.first);
+        }
+    }
+
+    validateParameters();
+    initialized = true;
 }
+
+void Config::validateParameters()
+{
+    if (numCPU < 1 || numCPU > 128)
+    {
+        throw ConfigException("Invalid number of CPUs (must be between 1 and 128): " + std::to_string(numCPU));
+    }
+
+    if (schedulerType != "fcfs" && schedulerType != "rr")
+    {
+        throw ConfigException("Invalid scheduler type (must be either 'fcfs' or 'rr'): " + schedulerType);
+    }
+
+    if (quantumCycles < 1)
+    {
+        throw ConfigException("Invalid quantum cycles (must be at least 1): " + std::to_string(quantumCycles));
+    }
+
+    if (batchProcessFreq < 1)
+    {
+        throw ConfigException("Invalid batch process frequency (must be at least 1): " + std::to_string(batchProcessFreq));
+    }
+
+    if (minInstructions < 1)
+    {
+        throw ConfigException("Invalid minimum instructions (must be at least 1): " + std::to_string(minInstructions));
+    }
+
+    if (maxInstructions < minInstructions)
+    {
+        throw ConfigException("Invalid maximum instructions (must be greater than or equal to min-ins): " + std::to_string(maxInstructions));
+    }
+
+    if (delaysPerExec < 0)
+    {
+        throw ConfigException("Invalid delays per execution (must be non-negative): " + std::to_string(delaysPerExec));
+    }
+}
+
 void Config::displayConfig() const {
-    std::cout << "Number of CPUs: " << numCpu << std::endl;
-    std::cout << "Scheduler: " << scheduler << std::endl;
+    std::cout << "Number of CPUs: " << numCPU << std::endl;
+    std::cout << "Scheduler: " << schedulerType << std::endl;
     std::cout << "Quantum Cycles: " << quantumCycles << std::endl;
     std::cout << "Batch Process Frequency: " << batchProcessFreq << std::endl;
-    std::cout << "Minimum Instructions: " << minIns << std::endl;
-    std::cout << "Maximum Instructions: " << maxIns << std::endl;
+    std::cout << "Minimum Instructions: " << minInstructions << std::endl;
+    std::cout << "Maximum Instructions: " << maxInstructions << std::endl;
     std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
-}
-int Config::getNumCpu() const {
-    return numCpu;
-}
-
-std::string Config::getScheduler() const {
-    return scheduler;
-}
-
-int Config::getQuantumCycles() const {
-    return quantumCycles;
-}
-
-int Config::getBatchProcessFreq() const {
-    return batchProcessFreq;
-}
-
-int Config::getMinIns() const {
-    return minIns;
-}
-
-int Config::getMaxIns() const {
-    return maxIns;
-}
-
-int Config::getDelaysPerExec() const {
-    return delaysPerExec;
 }

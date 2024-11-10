@@ -1,37 +1,37 @@
-//
-// Created by shem on 11/6/24.
-//
+#ifndef Console_H
+#define Console_H
 
-#ifndef CONSOLE_H
-#define CONSOLE_H
-#include <vector>
-#include "Process.h"
 #include <string>
+#include <memory>
+#include <windows.h>
+#include "headers/ProcessManager.h"
 
-#include "Scheduler.h"
+class Console
+{
+public:
+    static Console &getInstance()
+    {
+        static Console instance;
+        return instance;
+    }
 
-class Console {
-    public:
-        void startConsole();
-        void clearScreen();
-        void displayMainMenu();
-        void processCommand(const std::string &command);
-        void generateRandomInstructions();
-        std::vector<Process*> * processVector = new std::vector<Process*>;
-        std::vector<Core> * coreVector;
-        Scheduler* scheduler;
+    void start();
+    std::string getCurrentScreen() const { return currentScreen; }
 
 private:
+    Console() : initialized(false), currentScreen("main") {}
 
+    bool initialized;
+    std::string currentScreen;
 
-
-
-
-
+    void displayHeader();
+    void clearScreen();
+    void displayScreenHeader(const std::string &title);
+    void displayDivider();
+    void displayProcessScreen(const std::string &processName);
+    void handleCommand(const std::string &command);
+    void handleScreenCommand(const std::string &flag, const std::string &processName);
+    void initialize();
 };
 
-#endif //CONSOLE_H
-
-
-
-
+#endif

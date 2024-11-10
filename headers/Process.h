@@ -1,56 +1,76 @@
-//
-// Created by shem on 11/6/24.
-//
-
-// TODO: [Screen -s] When process is finished and user exits, delete the process
-#include<iostream>
 #ifndef PROCESS_H
 #define PROCESS_H
-#include<ctime>
-class Process {
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <atomic>
+#include <mutex>
+#include "CommandManager.h"
+#include "Config.h"
+#include "PrintCommand.h"
+
+class Process
+{
 public:
-    explicit Process(std::string processName);
-    void setInstructionsDone(int instructions);
-    void setCoreAssigned(int core);
+    enum ProcessState
+    {
+        READY,
+        RUNNING,
+        WAITING,
+        FINISHED
+    };
 
-    void setDone(bool done);
-    void setRunning( bool running);
-    void setWaiting( bool waiting);
-    void setProcessNameID(int id);
+    // Constructor
+    Process(int pid, const std::string &name);
 
+    // Command management
+    void addCommand(CommandManager::CommandType commandType);
+    void executeCurrentCommand(int coreID);
+    void moveToNextLine();
 
-    void setInstructionsTotal(int instructions); //only called once
-    // getters
-    std::string getProcessName() const;
-    int getInstructionsDone() const;
-    int getCoreAssigned() const;
-    bool getDone() const;
-    bool getRunning() const;
-    bool getWaiting() const;
-    int getInstructionsTotal() const;
-    int getProcessNameID() const;
+    // Process status
+    bool isFinished();
+    int getCommandCounter();
+    int getLinesOfCode();
+    ProcessState getState();
+    void setState(ProcessState state);
+    std::chrono::system_clock::time_point getCreationTime() const { return creationTime; }
 
+    // Core assignment
+    void setCPUCoreID(int cpuCoreID);
+    int getCPUCoreID();
 
-    std::time_t startTime = 0 ;
-    std::time_t endTime = 0;
+    // Process identification
+    int getPID() const;
+    std::string getName() const;
 
+    // Round Robin support
+    void resetQuantumTime() { quantumTime = 0; }
+    uint32_t getQuantumTime() { return quantumTime.load(); }
+    void incrementQuantumTime() { ++quantumTime; }
 
-
-
+    // Process-smi command
+    void displayProcessInfo();
 
 private:
+    // Basic process information
+    const int pid;
+    const std::string name;
+    std::atomic<ProcessState> state; 
+    std::atomic<int> cpuCoreID;
+    std::chrono::system_clock::time_point creationTime;
 
+    // Command management
+    std::vector<std::shared_ptr<CommandManager>> commandList;
+    std::atomic<int> commandCounter; 
 
-    int processNameID;
-    
-    std::string processName;
-    int coreAssigned = -1;
-    bool isDone = false; //when not waiting to be done by scheduler
-    bool isRunning = false; //when running on a core
-    bool isWaiting = false; // in ready queue
+    // Round Robin timing
+    std::atomic<uint32_t> quantumTime; 
 
-    int instructionsDone = 0;
-    int instructionsTotal = 0;
+    mutable std::mutex processMutex;
 
+    int generateInstructionCount() const;
 };
-#endif //PROCESS_H
+
+#endif

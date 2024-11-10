@@ -1,68 +1,74 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include <vector>
 #include <queue>
-#include <string>
 #include <thread>
+#include <memory>
 #include <mutex>
 #include <condition_variable>
-#include "Process.h"
+#include <atomic>
+#include <vector>
+#include "headers/Process.h"
 #include "Config.h"
-struct Core {
-    std::thread* thread;
-    Process* process;
-    bool isRunning = false;
-    bool isIdle = false;
 
-
-};
-class Scheduler {
+class Scheduler
+{
 public:
+    static Scheduler &getInstance()
+    {
+        static Scheduler instance;
+        return instance;
+    }
 
+    Scheduler(const Scheduler &) = delete;
+    Scheduler &operator=(const Scheduler &) = delete;
 
-    Scheduler(Config config, std::vector<Process*>* processVector);
-
-    void addProcessToReadyQueue(Process *process);
-    void generateDummyProcesses();
-    void startSchedulerTest();
-    void runFCFSScheduler(int cpuIndex);
-    void addProcess(Process* process);
-
-    void runRR(int cpuIndex);
-
-    void startThreads();
-
-    void taskManager();
-
-    void listScreens();
-
-    std::vector<Core> *getCoreVector();
-
-    int globalExecDelay = 0;
+    void addProcess(std::shared_ptr<Process> process);
+    void startScheduling();
+    void stopScheduleProcess();
+    void cpuUtil() const;
+    uint64_t getCPUCycles() const { return cpuCycles.load(); }
 
 private:
-    std::queue<Process *> readyQueue;
-    std::vector<Process *> * processVector;
-    std::vector <Core> coreVector;
-    int numCores;
-    std::string schedulingAlgorithm;
-    int quantumCycles;
-    int batchProcessFrequency;
-    int minimumInstructions;
-    int maxInstructions;
-    int delaysPerExecution;
+    Scheduler();
+    ~Scheduler() { stopScheduleProcess(); }
 
-    bool schedulerTestRunning = false;
-    int processCounter = 0;
+    std::atomic<bool> isInitialized{false};
 
-    std::mutex mtx;
-    std::condition_variable cv;
+    // Process queues
+    std::queue<std::shared_ptr<Process>> readyQueue;
+    std::vector<std::shared_ptr<Process>> runningProcesses;
+    std::vector<std::shared_ptr<Process>> finishedProcesses;
 
-    std::thread generateThread;
+    // Synchronization with timed mutexes
+    mutable std::timed_mutex mutex;
+    mutable std::timed_mutex syncMutex;
+    std::condition_variable_any cv;
+    std::condition_variable_any syncCv;
+    std::atomic<int> coresWaiting{0};
+    std::atomic<bool> processingActive{false};
 
+    // CPU management
+    std::vector<std::thread> cpuThreads;
+    std::vector<bool> coreStatus;
+    std::atomic<uint64_t> cpuCycles{0};
+    std::thread cycleThreadCount;
+    std::atomic<bool> cycleCounter{false};
 
-    std::vector<Process *> finishedProcesses;
+    // Core methods
+    void processHandler();
+    std::shared_ptr<Process> nextProcess();
+    std::shared_ptr<Process> RR();
+    std::shared_ptr<Process> FCFS();
+    void quantumHandler(std::shared_ptr<Process> process);
+    bool quantumExpiration(const std::shared_ptr<Process> &process) const;
+    void updateCoreStatus(int coreID, bool active);
+    void synchronization();
+    void counter();
+    
+    void incrementCPUCycles() { 
+        ++cpuCycles; 
+    }
 };
 
-#endif //SCHEDULER_H
+#endif

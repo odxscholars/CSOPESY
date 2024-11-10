@@ -1,66 +1,14 @@
-#include <iostream>
-
 #include "headers/Console.h"
-#include "headers/Process.h"
-#include <vector>
-#ifdef _WIN32
-#include <conio.h>
-#else
-#include <termios.h>
-#endif
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #include <unistd.h>
-#endif
-
-// #include "ScreenCommand.h"
-#include <ctime>
-#include <iomanip>
 #include "headers/Config.h"
-#include "headers/Scheduler.h"
-//TODO: Implement report-util
-//TODO: Implement Screen commands handling
-//TODO: Implement process-smi
-//TODO: Implement memory manager
 
-#include <algorithm> 
-#include <random>     
-#include <sstream>   
+#include <iostream>
+#include <sstream>
+#include <thread>
+#include <chrono>
+#include <iomanip>
+#include <windows.h>
 
-void Console::startConsole()
-{
-
-
-    displayMainMenu();
-    int cpuCycles = 0;
-    // Get the input command for main menu
-    std::string command;
-
-
-
-
-
-    while (true)
-    {
-        std::cout << "\nEnter command: ";
-        std::getline(std::cin, command);
-        processCommand(command);
-        cpuCycles++;
-    }
-}
-
-
-bool isInitialized = false;
-
-void Console::clearScreen() {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-}
-void Console::displayMainMenu() {
+void Console::displayHeader() {
         std::cout << R"(
                                _____  _____  ____  _____  ______  _______     __
                               / ____|/ ____|/ __ \|  __ \|  ____|/ ____\ \   / /
@@ -88,137 +36,267 @@ void Console::displayMainMenu() {
     std::cout << "  'exit'           - Exit the application\n";
 }
 
+void Console::start()
+{
+    displayHeader();
+    std::string input;
 
+    while (true)
+    {
+        if (currentScreen == "main")
+        {
+            std::cout << "\nroot\\> ";
+        }
+        else
+        {
+            std::cout << "\n"
+                      << currentScreen << "\\> ";
+        }
 
-void Console::processCommand(const std::string &command) {
-    // std::stringstream ss(command);
-    // std::string cmd, option, screenName;
-    // ss >> cmd >> option >> screenName;
+        std::getline(std::cin, input);
 
+        if (input == "exit")
+        {
+            if (currentScreen != "main")
+            {
+                clearScreen();
+                currentScreen = "main";
+                displayHeader();
+                continue;
+            }
+            break;
+        }
+
+        try
+        {
+            handleCommand(input);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }
+    }
+}
+
+void Console::handleCommand(const std::string &command)
+{
     std::istringstream iss(command);
-    std::string cmd, option, processName;
-    iss >> cmd >> option;
-    // bool started = false;
+    std::string cmd;
+    iss >> cmd;
 
-    // static Scheduler* scheduler = nullptr;
-
-    if (!isInitialized && command != "initialize" && command != "exit") {
-        std::cout << "Initialize First.\n";
+    if (!initialized && cmd != "initialize" && cmd != "exit")
+    {
+        std::cout << "initialize first.\n";
         return;
     }
 
-    if (command == "initialize") {
-        Config loadedConfig("config.txt");
-        loadedConfig.loadConfig();
-        scheduler = new Scheduler(loadedConfig, processVector); //IMPORTANT: ProcessVector is a pointer to the processVector in Console
-        loadedConfig.displayConfig();
-        isInitialized = true;
-        std::cout << "Initialized using config.txt\n";
-        this->coreVector = scheduler->getCoreVector(); // IMPORTANT: This is a pointer to the coreVector in Scheduler
-    } else if (cmd == "screen") {
+    if (currentScreen == "main")
+    {
+        if (cmd == "initialize")
+        {
+            initialize();
+        }
+        else if (cmd == "screen")
+        {
+            std::string screenCommand;
+            std::string processName;
+            iss >> screenCommand >> processName;
 
-        if (option == "-s") {
-        iss >> processName;
-
-            // Check lang if this exists na
-            if (std::any_of(processVector->begin(), processVector->end(), [&](const Process* p) {
-                return p->getProcessName() == processName;
-            })) {
-                std::cout << "Process name \"" << processName << "\" already exists." << std::endl;
-                return;
+            if (screenCommand == "-s" || screenCommand == "-r" || screenCommand == "-ls")
+            {
+                handleScreenCommand(screenCommand, processName);
             }
-
-            Config loadedConfig("config.txt");
-            loadedConfig.loadConfig();
-
-            int minInstructions = loadedConfig.getMinIns();
-            int maxInstructions = loadedConfig.getMaxIns();
-
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<int> distr(minInstructions, maxInstructions);
-            int instructionsTotal = distr(gen);
-
-            // generate new process
-            Process* newProcess = new Process(processName);
-            newProcess->setInstructionsDone(instructionsTotal);  
-            newProcess->setProcessNameID(static_cast<int>(processVector->size()) + 1); 
-
-            // Add to processVector and scheduler
-            processVector->push_back(newProcess);
-            scheduler->addProcess(newProcess);
-
-            std::cout << "New process \"" << processName << "\" created with ID " << newProcess->getProcessNameID()
-                    << " and " << instructionsTotal << " instructions." << std::endl;
+            else
+            {
+                std::cout << "Invalid screen command. Use -s <name>, -r <name>, or -ls\n";
+            }
         }
-        // ScreenCommand screenCommand(scheduler);
-        else if (option == "-ls") {
-            //TODO: Print something different when the scheduler hasn't started
-            std::cout << "-----------------------------------------------------------\n";
-            // if(!started) {
-            //     std::cout << "Nothing to see here!\n";
-            // } else {
-                std::cout << "Running Processes: \n";
-                for(const auto& process : *processVector) {
-                    if(process->getRunning() == true) {
-                        std::cout << process->getProcessName()
-                            << "\t("
-                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
-                            << ")\t Core: "
-                            << process->getCoreAssigned()
-                            << "\t "
-                            << process->getInstructionsDone()
-                            << "/"
-                            << process->getInstructionsTotal()
-                            << "\n";
-                    }
-                }
-            
-                std::cout << "\n\nFinished Processes: \n";
-                for(const auto& process : *processVector) {
-                    if(process->getDone() == true) {
-                        std::cout << process->getProcessName()
-                            << "\t ("
-                            << std::put_time(std::localtime(&process->startTime), "%Y-%m-%d %H:%M:%S")
-                            << ")\t Status: Finished"
-                            << "\t "
-                            << process->getInstructionsDone()
-                            << "/"
-                            << process->getInstructionsTotal()
-                            << "\n";
-                    }
-                }
-            // }
-            std::cout << "-----------------------------------------------------------\n";
-        } else {
-            // screenCommand.processScreenCommand(option, screenName);
+        else if (cmd == "scheduler-test")
+        {
+            ProcessManager::getInstance().startBatch();
+            std::cout << "Batch process generation started.\n";
         }
-    } else if (command == "scheduler-test") {
-        scheduler->startSchedulerTest();
-        // if (scheduler) {
-        //     // scheduler->startSchedulerTest();
-        // } else {
-        //     std::cout << "Scheduler not initialized.\n";
-        // }
-    } else if (command == "scheduler-stop") {
-        // if (scheduler) {
-        //     scheduler->stopSchedulerTest();
-        // } else {
-        //     std::cout << "Scheduler not initialized.\n";
-        // }
-    } else if (command == "report-util") {
-        // ReportCommand reportCommand;
-        // reportCommand.runReportUtil();
-    } else if (command == "clear") {
-        clearScreen();
-        displayMainMenu();
-    } else if (command == "exit") {
-        std::cout << "Exiting the application.\n";
-        // if (scheduler) {
-        //     delete scheduler;
-        // }
-        exit(0);
-    } else {
-        std::cout << "Unknown command. Try again.\n";
+        else if (cmd == "scheduler-stop")
+        {
+            ProcessManager::getInstance().stopBatch();
+            std::cout << "Batch process generation stopped.\n";
+        }
+        else if (cmd == "report-util")
+        {
+            Scheduler::getInstance().cpuUtil();
+        }
+        else if (cmd == "clear"){
+            clearScreen();
+            displayHeader();
+        }
+        else if (cmd == "marquee")
+        {
+            std::cout << "Starting marquee application...\n";
+            std::cout << "Press Ctrl+C to stop.\n";
+            while (true)
+            {
+                std::cout << "CSOPESY ";
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::cout << "\b\b\b\b\b\b\b";
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }
+        }
+        else if (cmd != "exit")
+        {
+            std::cout << "Invalid command.\n";
+        }
     }
+    else
+    {
+        if (cmd == "process-smi")
+        {
+            auto process = ProcessManager::getInstance().getProcess(currentScreen);
+            if (process)
+            {
+                process->displayProcessInfo();
+            }
+            else
+            {
+                std::cout << "Process does not exist.\n";
+                currentScreen = "main";
+                clearScreen();
+                displayHeader();
+            }
+        }
+        else if (cmd != "exit")
+        {
+            std::cout << "Invalid command. Available commands: process-smi, exit\n";
+        }
+    }
+}
+
+void Console::initialize()
+{
+    Config::getInstance().loadConfig("config.txt");
+    initialized = true;
+    Scheduler::getInstance().startScheduling();
+    Config::getInstance().displayConfig();
+
+
+}
+
+void Console::handleScreenCommand(const std::string &screenCommand, const std::string &processName)
+{
+    if (screenCommand == "-s")
+    {
+        // Screen creation command
+        if (processName.empty())
+        {
+            std::cout << "Error: Process name is required\n";
+            return;
+        }
+
+        try
+        {
+            ProcessManager::getInstance().generateProcess(processName);
+            clearScreen();
+            currentScreen = processName;
+
+            displayScreenHeader("Process Screen: " + processName);
+
+            std::cout << "Available Commands:\n"
+                      << "  [1] process-smi   - Show process information\n"
+                      << "  [2] exit          - Return to main menu\n\n";
+
+            displayDivider();
+
+            auto process = ProcessManager::getInstance().getProcess(processName);
+            if (process)
+            {
+                process->displayProcessInfo();
+            }
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error in screen command: " << e.what() << "\n";
+            currentScreen = "main";
+        }
+    }
+    else if (screenCommand == "-r")
+    {
+        auto process = ProcessManager::getInstance().getProcess(processName);
+        if (process && process->getState() != Process::FINISHED)
+        {
+            clearScreen();
+            currentScreen = processName;
+
+            displayScreenHeader("Resuming Process Screen: " + processName);
+
+            std::cout << "Commands:\n"
+                      << "  [1] process-smi   - Show process information\n"
+                      << "  [2] exit          - Return to main menu\n\n";
+
+            displayDivider();
+            process->displayProcessInfo();
+        }
+        else
+        {
+            std::cout << "Process \"" << processName << "\" not found or has finished.\n";
+        }
+    }
+    else if (screenCommand == "-ls")
+    {
+        std::cout << "\n=========================================\n";
+        std::cout << "          Active Processes List          \n";
+        std::cout << "=========================================\n";
+        
+        ProcessManager::getInstance().listProcesses();
+        
+        std::cout << "=========================================\n\n";
+    }
+}
+
+void Console::displayScreenHeader(const std::string &title)
+{
+    std::cout << "\n=========================================\n";
+    std::cout << "          " << title << "\n";
+    std::cout << "=========================================\n";
+}
+
+void Console::displayDivider()
+{
+    std::cout << "-----------------------------------------\n\n";
+}
+
+
+void Console::displayProcessScreen(const std::string &processName)
+{
+    clearScreen();
+
+    std::cout << "╔════════════════════════════════════════╗\n"
+              << "║           PROCESS SCREEN               ║\n"
+              << "╠════════════════════════════════════════╣\n"
+              << "║ Process: " << std::setw(28) << std::left << processName << "║\n"
+              << "╠════════════════════════════════════════╣\n"
+              << "║ Available Commands:                    ║\n"
+              << "║  • process-smi - Show process info     ║\n"
+              << "║  • exit        - Return to main menu   ║\n"
+              << "╚════════════════════════════════════════╝\n\n";
+
+    if (auto process = ProcessManager::getInstance().getProcess(processName))
+    {
+        std::cout << "Process Details:\n";
+        std::cout << "────────────────────────────────────────\n";
+        process->displayProcessInfo();
+        std::cout << "────────────────────────────────────────\n";
+    }
+    else
+    {
+        std::cout << "Error: Process \"" << processName << "\" not found.\n";
+    }
+}
+
+
+void Console::clearScreen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
