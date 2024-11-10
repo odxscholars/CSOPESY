@@ -32,42 +32,6 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector) {
     }
 }
 
-<<<<<<< Updated upstream
-void Scheduler::listScreens() {
-    std::lock_guard<std::mutex> lock(mtx);
-
-    int usedCores = 0;
-    for (const auto& core : coreVector) {
-        if (!core.isIdle) usedCores++;
-    }
-
-    double cpuUtilization = (static_cast<double>(usedCores) / numCores) * 100;
-
-    std::cout << "----------------\n";
-    std::cout << "CPU Utilization: " << std::fixed << std::setprecision(2) << cpuUtilization << "%\n";
-    std::cout << "Cores Used: " << usedCores << "/" << numCores << "\n";
-    std::cout << "Running Processes:\n";
-
-    for (int i = 0; i < numCores; ++i) {
-        if (coreVector[i].process != nullptr) {
-            std::cout << "CPU " << i << ": " << coreVector[i].process->getProcessName()
-                      << " | Instructions Done: " << coreVector[i].process->getInstructionsDone()
-                      << "/" << coreVector[i].process->getInstructionsTotal() << "\n";
-        } else {
-            std::cout << "CPU " << i << ": Idle\n";
-        }
-    }
-
-    std::cout << "----------------\n";
-    std::cout << "Finished Processes:\n";
-    for (const auto& process : finishedProcesses) {
-        std::cout << process->getProcessName() << " | Instructions Done: "
-                  << process->getInstructionsDone() << "/" << process->getInstructionsTotal() << "\n";
-    }
-    std::cout << "----------------\n";
-}
-
-=======
 
 
 
@@ -89,7 +53,6 @@ void Scheduler::addProcess(Process* process) {
 }
 
 
->>>>>>> Stashed changes
 void Scheduler::addProcessToReadyQueue( Process * process) {
     {
         std::lock_guard<std::mutex> lock(mtx);
