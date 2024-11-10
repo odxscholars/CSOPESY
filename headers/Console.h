@@ -4,33 +4,25 @@
 
 #ifndef CONSOLE_H
 #define CONSOLE_H
-#include <vector>
 #include "Process.h"
 #include <string>
+#include <vector>
 
 #include "Scheduler.h"
 
 class Console {
-    public:
-        void startConsole();
-        void clearScreen();
-        void displayMainMenu();
-        void processCommand(const std::string &command);
-        std::vector<Process*> * processVector = new std::vector<Process*>;
-        std::vector<Core> * coreVector;
-        Scheduler* scheduler;
+public:
+  void startConsole();
+  void clearScreen();
+  void displayMainMenu();
+  void processSMI(Process &process);
+  void processCommand(const std::string &command, bool &session);
+  std::vector<Process *> *processVector = new std::vector<Process *>;
+  std::vector<Core> *coreVector;
+  Scheduler *scheduler;
 
 private:
-
-
-
-
-
-
+  std::vector<std::string> existingSessions;
 };
 
-#endif //CONSOLE_H
-
-
-
-
+#endif // CONSOLE_H

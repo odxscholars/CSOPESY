@@ -1,65 +1,61 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include <vector>
+#include "Config.h"
+#include "Process.h"
+#include <condition_variable>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
-#include "Process.h"
-#include "Config.h"
+#include <vector>
 struct Core {
-    std::thread* thread;
-    Process* process;
-    bool isRunning = false;
-    bool isIdle = false;
-
-
+  std::thread *thread;
+  Process *process;
+  bool isRunning = false;
+  bool isIdle = false;
 };
 class Scheduler {
 public:
+  Scheduler(Config config, std::vector<Process *> *processVector);
 
+  void addProcessToReadyQueue(Process *process);
+  void addCustomProcess(Process *process);
+  void generateDummyProcesses();
+  void startSchedulerTest();
+  void runFCFSScheduler(int cpuIndex);
 
-    Scheduler(Config config, std::vector<Process*>* processVector);
+  void runRR(int cpuIndex);
 
-    void addProcessToReadyQueue(Process *process);
-    void generateDummyProcesses();
-    void startSchedulerTest();
-    void runFCFSScheduler(int cpuIndex);
+  void startThreads();
 
-    void runRR(int cpuIndex);
+  void taskManager();
 
-    void startThreads();
+  std::vector<Core> *getCoreVector();
 
-    void taskManager();
-
-    std::vector<Core> *getCoreVector();
-
-    int globalExecDelay = 0;
+  int globalExecDelay = 0;
 
 private:
-    std::queue<Process *> readyQueue;
-    std::vector<Process *> * processVector;
-    std::vector <Core> coreVector;
-    int numCores;
-    std::string schedulingAlgorithm;
-    int quantumCycles;
-    int batchProcessFrequency;
-    int minimumInstructions;
-    int maxInstructions;
-    int delaysPerExecution;
+  std::queue<Process *> readyQueue;
+  std::vector<Process *> *processVector;
+  std::vector<Core> coreVector;
+  int numCores;
+  std::string schedulingAlgorithm;
+  int quantumCycles;
+  int batchProcessFrequency;
+  int minimumInstructions;
+  int maxInstructions;
+  int delaysPerExecution;
 
-    bool schedulerTestRunning = false;
-    int processCounter = 0;
+  bool schedulerTestRunning = false;
+  int processCounter = 0;
 
-    std::mutex mtx;
-    std::condition_variable cv;
+  std::mutex mtx;
+  std::condition_variable cv;
 
-    std::thread generateThread;
+  std::thread generateThread;
 
-
-    std::vector<Process *> finishedProcesses;
+  std::vector<Process *> finishedProcesses;
 };
 
-#endif //SCHEDULER_H
+#endif // SCHEDULER_H

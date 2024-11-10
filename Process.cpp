@@ -1,55 +1,40 @@
 #include "headers/Process.h"
 
-Process::Process(std::string processName) : processName(std::move(processName)) {}
+Process::Process(std::string processName)
+    : processName(std::move(processName)) {}
 
 void Process::setInstructionsDone(int instructions) {
-    instructionsDone = instructions;
+  instructionsDone = instructions;
 }
 
-void Process::setCoreAssigned(int core) {
-    coreAssigned = core;
+void Process::setCoreAssigned(int core) { coreAssigned = core; }
+
+void Process::setDone(bool done) { isDone = done; }
+
+void Process::setScreenName(std::string screenName) {
+  this->screenName = screenName;
 }
 
-void Process::setDone(bool done) {
-    isDone = done;
-}
+void Process::setRunning(bool running) { isRunning = running; }
 
-void Process::setRunning(bool running) {
-    isRunning = running;
-}
-
-void Process::setWaiting(bool waiting) {
-    isWaiting = waiting;
-}
+void Process::setWaiting(bool waiting) { isWaiting = waiting; }
 
 void Process::setInstructionsTotal(int instructions) {
-    instructionsTotal = instructions;
+  instructionsTotal = instructions;
 }
 
-std::string Process::getProcessName() const {
-    return processName;
-}
+std::string Process::getProcessName() const { return processName; }
 
-int Process::getInstructionsDone() const {
-    return instructionsDone;
-}
+int Process::getInstructionsDone() const { return instructionsDone; }
 
-int Process::getCoreAssigned() const {
-    return coreAssigned;
-}
+int Process::getCoreAssigned() const { return coreAssigned; }
 
-bool Process::getDone() const {
-    return isDone;
-}
+bool Process::getDone() const { return isDone; }
 
-bool Process::getRunning() const {
-    return isRunning;
-}
+bool Process::getRunning() const { return isRunning; }
 
-bool Process::getWaiting() const {
-    return isWaiting;
-}
+bool Process::getWaiting() const { return isWaiting; }
 
-int Process::getInstructionsTotal() const {
-    return instructionsTotal;
-}
+int Process::getInstructionsTotal() const { return instructionsTotal; }
+
+std::string Process::getScreenName() const { return screenName; }

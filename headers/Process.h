@@ -16,6 +16,7 @@ public:
     void setDone(bool done);
     void setRunning( bool running);
     void setWaiting( bool waiting);
+    void setScreenName(std::string screenName);
 
 
     void setInstructionsTotal(int instructions); //only called once
@@ -27,6 +28,7 @@ public:
     bool getRunning() const;
     bool getWaiting() const;
     int getInstructionsTotal() const;
+    std::string getScreenName() const;
 
 
     std::time_t startTime = 0 ;
@@ -41,6 +43,7 @@ private:
 
 
     std::string processName;
+    std::string screenName;
     int coreAssigned = -1;
     bool isDone = false; //when not waiting to be done by scheduler
     bool isRunning = false; //when running on a core
