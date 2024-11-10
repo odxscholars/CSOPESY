@@ -1,5 +1,5 @@
-#include "Functions.h"
-#include "TimeStamps.h"
+#include "headers/Functions.h"
+#include "headers/TimeStamps.h"
 
 #include <iostream>
 #include <iomanip>

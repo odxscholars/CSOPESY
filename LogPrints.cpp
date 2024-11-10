@@ -1,5 +1,5 @@
-#include "LogPrints.h"
-#include "Console.h"
+#include "headers/LogPrints.h"
+#include "headers/Console.h"
 #include <fstream>
 #include <iostream>
 #include <chrono>

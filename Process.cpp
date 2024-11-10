@@ -1,6 +1,6 @@
-#include "Process.h"
-#include "LogPrints.h"
-#include "TimeStamps.h"
+#include "headers/Process.h"
+#include "headers/LogPrints.h"
+#include "headers/TimeStamps.h"
 
 #include <iostream>
 #include <random>
