@@ -67,21 +67,38 @@ void Scheduler::addProcess(std::shared_ptr<Process> process)
 {
     if (!process) return;
 
+    Config& config = Config::getInstance();
+    uint16_t memoryPerProcess = config.getMemPerProc();
+    uint16_t availableMemory = config.getMaxOverallMem();
+
     std::unique_lock<std::timed_mutex> lock(mutex, std::defer_lock);
-    
+
     if (lock.try_lock_for(std::chrono::milliseconds(100))) {
-        readyQueue.push(process);
+        // Check if enough memory is available
+        if (memoryPerProcess <= availableMemory) {
+            // Allocate memory for the process
+            availableMemory -= memoryPerProcess;
+            
+            // Add the process to the ready queue
+            readyQueue.push(process);
+            cv.notify_all();
+        } else {
+            // Not enough memory, re-add to the end of the ready queue
+            readyQueue.push(process);
+        }
+        
         lock.unlock();
-        cv.notify_all();
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-
-    
 }
 
 
 void Scheduler::processHandler()
 {
+    Config& config = Config::getInstance();
+    uint16_t memoryPerProcess = config.getMemPerProc();
+    uint16_t availableMemory = config.getMaxOverallMem();
+    
     while (processingActive)
     {
         std::shared_ptr<Process> currentProcess = nullptr;
@@ -98,12 +115,12 @@ void Scheduler::processHandler()
         if (currentProcess)
         {
             currentProcess->setState(Process::RUNNING);
-            int delays = Config::getInstance().getDelaysPerExec(), currentDelay = 0;
+            int delays = config.getDelaysPerExec(), currentDelay = 0;
 
             while (!currentProcess->isFinished() && processingActive)
             {
-                if (Config::getInstance().getSchedulerType() == "rr" &&
-                    currentProcess->getQuantumTime() >= Config::getInstance().getQuantumCycles())
+                if (config.getSchedulerType() == "rr" &&
+                    currentProcess->getQuantumTime() >= config.getQuantumCycles())
                 {
                     updateCoreStatus(currentProcess->getCPUCoreID(), false);
                     quantumHandler(currentProcess);
@@ -119,7 +136,7 @@ void Scheduler::processHandler()
                     currentProcess->executeCurrentCommand(currentProcess->getCPUCoreID());
                     currentProcess->moveToNextLine();
                     currentDelay = 0;
-                    if (Config::getInstance().getSchedulerType() == "rr") currentProcess->incrementQuantumTime();
+                    if (config.getSchedulerType() == "rr") currentProcess->incrementQuantumTime();
                 }
 
                 synchronization();
@@ -131,9 +148,13 @@ void Scheduler::processHandler()
                 {
                     currentProcess->setState(Process::FINISHED);
                     finishedProcesses.push_back(currentProcess);
+
+                    // Release memory for the finished process
+                    availableMemory += memoryPerProcess;
+
                     updateCoreStatus(currentProcess->getCPUCoreID(), false);
                 }
-                else if (Config::getInstance().getSchedulerType() != "rr")
+                else if (config.getSchedulerType() != "rr")
                 {
                     currentProcess->setState(Process::READY);
                     readyQueue.push(currentProcess);
@@ -150,6 +171,7 @@ void Scheduler::processHandler()
         }
     }
 }
+
 
 
 std::shared_ptr<Process> Scheduler::nextProcess()
