@@ -204,7 +204,7 @@ void Scheduler::quantumHandler(std::shared_ptr<Process> process)
     readyQueue.push(process);
 }
 
-void Scheduler::cpuUtil() const
+void Scheduler::cpuUtil() const //report utilization also
 {
     std::stringstream report;
     int totalCores, usedCores;
@@ -240,12 +240,12 @@ void Scheduler::cpuUtil() const
 
     std::cout << report.str();
 
-    std::ofstream logFile("csopesy-log.txt", std::ios::app);
+    std::ofstream logFile("nathanbaho.txt", std::ios::app);
     if (logFile)
     {
         logFile << report.str() << "\n";
         logFile.close();
-        std::cout << "Report generated at c:/csopesy-log.txt\n";
+        std::cout << "nathanbaho.txt created!\n";
     }
 }
 

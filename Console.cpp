@@ -38,45 +38,34 @@ void Console::displayHeader() {
 
 void Console::start()
 {
+    const std::string MAIN_SCREEN = "main";
     displayHeader();
     std::string input;
 
     while (true)
     {
-        if (currentScreen == "main")
-        {
-            std::cout << "\nroot\\> ";
-        }
-        else
-        {
-            std::cout << "\n"
-                      << currentScreen << "\\> ";
-        }
-
+        std::cout << "\n" << (currentScreen == MAIN_SCREEN ? "Enter command: " : currentScreen + "\\> ");
         std::getline(std::cin, input);
 
         if (input == "exit")
         {
-            if (currentScreen != "main")
+            if (currentScreen != MAIN_SCREEN)
             {
                 clearScreen();
-                currentScreen = "main";
+                currentScreen = MAIN_SCREEN;
                 displayHeader();
-                continue;
             }
-            break;
+            else
+            {
+                break; 
+            }
+            continue; 
         }
 
-        try
-        {
-            handleCommand(input);
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
+        handleCommand(input);
     }
 }
+
 
 void Console::handleCommand(const std::string &command)
 {
@@ -225,12 +214,7 @@ void Console::handleScreenCommand(const std::string &screenCommand, const std::s
             clearScreen();
             currentScreen = processName;
 
-            displayScreenHeader("Resuming Process Screen: " + processName);
-
-            std::cout << "Commands:\n"
-                      << "  [1] process-smi   - Show process information\n"
-                      << "  [2] exit          - Return to main menu\n\n";
-
+            displayScreenHeader(processName);
             displayDivider();
             process->displayProcessInfo();
         }
@@ -262,35 +246,6 @@ void Console::displayDivider()
 {
     std::cout << "-----------------------------------------\n\n";
 }
-
-
-void Console::displayProcessScreen(const std::string &processName)
-{
-    clearScreen();
-
-    std::cout << "╔════════════════════════════════════════╗\n"
-              << "║           PROCESS SCREEN               ║\n"
-              << "╠════════════════════════════════════════╣\n"
-              << "║ Process: " << std::setw(28) << std::left << processName << "║\n"
-              << "╠════════════════════════════════════════╣\n"
-              << "║ Available Commands:                    ║\n"
-              << "║  • process-smi - Show process info     ║\n"
-              << "║  • exit        - Return to main menu   ║\n"
-              << "╚════════════════════════════════════════╝\n\n";
-
-    if (auto process = Functions::getInstance().getProcess(processName))
-    {
-        std::cout << "Process Details:\n";
-        std::cout << "────────────────────────────────────────\n";
-        process->displayProcessInfo();
-        std::cout << "────────────────────────────────────────\n";
-    }
-    else
-    {
-        std::cout << "Error: Process \"" << processName << "\" not found.\n";
-    }
-}
-
 
 void Console::clearScreen()
 {

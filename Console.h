@@ -28,7 +28,6 @@ private:
     void clearScreen();
     void displayScreenHeader(const std::string &title);
     void displayDivider();
-    void displayProcessScreen(const std::string &processName);
     void handleCommand(const std::string &command);
     void handleScreenCommand(const std::string &flag, const std::string &processName);
     void initialize();
