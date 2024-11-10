@@ -1,8 +1,11 @@
-#include <cstdlib>
-#include <iostream>
-
 #include "headers/Console.h"
 #include "headers/Process.h"
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <ostream>
+#include <sstream>
 #include <vector>
 #ifdef _WIN32
 #include <conio.h>
@@ -92,12 +95,64 @@ void Console::processSMI(Process &process) {
             << "Lines of code: " << process.getInstructionsTotal();
 }
 
+std::string Console::generateReport() {
+  std::ostringstream report;
+  int cpuUtil = 0;
+  int coreUsed = 0;
+  int coreAvailable = 0;
+
+  for (const auto &core : *coreVector) {
+    if (core.isIdle) {
+      coreAvailable++;
+    } else {
+      coreUsed++;
+    }
+  }
+  cpuUtil = (coreUsed / coreCount) * 100;
+
+  report << "CPU utiliziation: " << cpuUtil << "%";
+  report << "\nCores used: " << coreUsed;
+  report << "\nCores available: " << coreAvailable << "\n";
+  report << "-----------------------------------------------------------\n";
+
+  /*report << "Existing custom processes: \n";*/
+  /*for (const std::string &screen : existingSessions) {*/
+  /*  report << numbering << ": " << screen << "\n";*/
+  /*  numbering++;*/
+  /*}*/
+  report << "\n\nRunning Processes: \n";
+  for (const auto &process : *processVector) {
+    if (process->getRunning() == true) {
+      report << process->getProcessName() << "\t("
+             << std::put_time(std::localtime(&process->startTime),
+                              "%Y-%m-%d %H:%M:%S")
+             << ")\t Core: " << process->getCoreAssigned() << "\t "
+             << process->getInstructionsDone() << "/"
+             << process->getInstructionsTotal() << "\n";
+    }
+  }
+
+  report << "\n\nFinished Processes: \n";
+  for (const auto &process : *processVector) {
+    if (process->getDone() == true) {
+      report << process->getProcessName() << "\t ("
+             << std::put_time(std::localtime(&process->startTime),
+                              "%Y-%m-%d %H:%M:%S")
+             << ")\t Status: Finished"
+             << "\t " << process->getInstructionsDone() << "/"
+             << process->getInstructionsTotal() << "\n";
+    }
+  }
+  // }
+  report << "-----------------------------------------------------------\n";
+  return report.str();
+}
+
 void Console::processCommand(const std::string &command, bool &session) {
   std::stringstream ss(command);
-  std::string cmd, option, screenName, sessionName;
+  std::string cmd, option, screenName;
   Process *currentProcess;
   ss >> cmd >> option >> screenName;
-  int maxins, minins, coreCount;
 
   // bool started = false;
 
@@ -142,59 +197,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     // ScreenCommand screenCommand(scheduler);
 
     if (option == "-ls") {
-      // TODO: Print something different when the scheduler hasn't started
-      int numbering = 1;
-      int cpuUtil = 0;
-      int coreUsed = 0;
-      int coreAvailable = 0;
-
-      for (const auto &core : *coreVector) {
-        if (core.isIdle) {
-          coreAvailable++;
-        } else {
-          coreUsed++;
-        }
-      }
-      // TODO: TEST THIS FUNCTION COMPUTATION!
-      cpuUtil = (coreUsed / coreCount) * 100;
-
-      std::cout << "CPU utiliziation: " << cpuUtil << "%";
-      std::cout << "\nCores used: " << coreUsed;
-      std::cout << "\nCores available: " << coreAvailable << "\n";
-      std::cout
-          << "-----------------------------------------------------------\n";
-
-      /*std::cout << "Existing custom processes: \n";*/
-      /*for (const std::string &screen : existingSessions) {*/
-      /*  std::cout << numbering << ": " << screen << "\n";*/
-      /*  numbering++;*/
-      /*}*/
-      std::cout << "\n\nRunning Processes: \n";
-      for (const auto &process : *processVector) {
-        if (process->getRunning() == true) {
-          std::cout << process->getProcessName() << "\t("
-                    << std::put_time(std::localtime(&process->startTime),
-                                     "%Y-%m-%d %H:%M:%S")
-                    << ")\t Core: " << process->getCoreAssigned() << "\t "
-                    << process->getInstructionsDone() << "/"
-                    << process->getInstructionsTotal() << "\n";
-        }
-      }
-
-      std::cout << "\n\nFinished Processes: \n";
-      for (const auto &process : *processVector) {
-        if (process->getDone() == true) {
-          std::cout << process->getProcessName() << "\t ("
-                    << std::put_time(std::localtime(&process->startTime),
-                                     "%Y-%m-%d %H:%M:%S")
-                    << ")\t Status: Finished"
-                    << "\t " << process->getInstructionsDone() << "/"
-                    << process->getInstructionsTotal() << "\n";
-        }
-      }
-      // }
-      std::cout
-          << "-----------------------------------------------------------\n";
+      std::cout << generateReport();
     } else if (option == "-s") {
       if (screenName != "") {
         auto item = std::find(existingSessions.begin(), existingSessions.end(),
@@ -250,8 +253,17 @@ void Console::processCommand(const std::string &command, bool &session) {
     //     std::cout << "Scheduler not initialized.\n";
     // }
   } else if (command == "report-util") {
-    // ReportCommand reportCommand;
-    // reportCommand.runReportUtil();
+    std::filesystem::path current_dir = std::filesystem::current_path();
+    std::ofstream outputFile("csopesy-log.txt");
+    std::cout << "Running report utility...\n";
+
+    if (outputFile.is_open()) {
+      outputFile << generateReport();
+      std::cout << "Report successfully generated!";
+    } else {
+      std::cout << "Something went wrong while opening the file!!" << std::endl;
+    }
+
   } else if (command == "clear") {
     clearScreen();
     displayMainMenu();
