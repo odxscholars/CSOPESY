@@ -1,12 +1,12 @@
-#include "ProcessManager.h"
-#include "Utils.h"
+#include "Functions.h"
+#include "TimeStamps.h"
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <chrono>
 
-void ProcessManager::generateProcess(const std::string &name)
+void Functions::generateProcess(const std::string &name)
 {
     if (name.empty()) throw std::runtime_error("Process name cannot be empty");
 
@@ -20,14 +20,14 @@ void ProcessManager::generateProcess(const std::string &name)
 
 }
 
-std::shared_ptr<Process> ProcessManager::getProcess(const std::string &name)
+std::shared_ptr<Process> Functions::getProcess(const std::string &name)
 {
     std::lock_guard<std::mutex> lock(processesMutex);
     auto it = processes.find(name);
     return (it != processes.end()) ? it->second : nullptr;
 }
 
-void ProcessManager::listProcesses()
+void Functions::listProcesses()
 {
     std::vector<std::shared_ptr<Process>> processSnapshot;
     int activeCount = 0, totalCores;
@@ -55,7 +55,7 @@ void ProcessManager::listProcesses()
         if (process->getState() == Process::FINISHED) process->displayProcessInfo();
 }
 
-void ProcessManager::startBatch()
+void Functions::startBatch()
 {
     if (!Config::getInstance().isInitialized()) throw std::runtime_error("initialize first");
 
@@ -63,11 +63,11 @@ void ProcessManager::startBatch()
     if (!batchProcessingActive)
     {
         batchProcessingActive = true;
-        batchProcessThread = std::thread(&ProcessManager::batchLoop, this);
+        batchProcessThread = std::thread(&Functions::batchLoop, this);
     }
 }
 
-void ProcessManager::stopBatch()
+void Functions::stopBatch()
 {
     {
         std::lock_guard<std::mutex> lock(batchMutex);
@@ -79,7 +79,7 @@ void ProcessManager::stopBatch()
     }
 }
 
-void ProcessManager::batchLoop()
+void Functions::batchLoop()
 {
     int processCounter = 1;
     uint64_t lastCycle = Scheduler::getInstance().getCPUCycles();
@@ -109,7 +109,7 @@ void ProcessManager::batchLoop()
     }
 }
 
-std::string ProcessManager::generateProcessName() const
+std::string Functions::generateProcessName() const
 {
     std::ostringstream oss;
     oss << 'p' << std::setfill('0') << std::setw(2) << nextPID;

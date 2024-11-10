@@ -1,5 +1,5 @@
-#ifndef PROCESS_MANAGER_H
-#define PROCESS_MANAGER_H
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
 #include <map>
 #include <string>
@@ -9,12 +9,12 @@
 #include "Process.h"
 #include "Scheduler.h"
 
-class ProcessManager
+class Functions
 {
 public:
-    static ProcessManager &getInstance()
+    static Functions &getInstance()
     {
-        static ProcessManager instance;
+        static Functions instance;
         return instance;
     }
 
@@ -25,8 +25,8 @@ public:
     void stopBatch();
 
 private:
-    ProcessManager() : nextPID(1), batchProcessingActive(false), lastProcessCreationCycle(0) {}
-    ~ProcessManager() { stopBatch(); }
+    Functions() : nextPID(1), batchProcessingActive(false), lastProcessCreationCycle(0) {}
+    ~Functions() { stopBatch(); }
 
     std::map<std::string, std::shared_ptr<Process>> processes;
     std::atomic<int> nextPID;

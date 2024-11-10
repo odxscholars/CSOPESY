@@ -1,6 +1,6 @@
 #include "Process.h"
-#include "PrintCommand.h"
-#include "Utils.h"
+#include "LogPrints.h"
+#include "TimeStamps.h"
 
 #include <iostream>
 #include <random>
@@ -18,7 +18,7 @@ Process::Process(int pid, const std::string &name)
       creationTime(std::chrono::system_clock::now())
 {
     int numInstructions = generateInstructionCount();
-    commandList.resize(numInstructions, std::make_shared<PrintCommand>(pid, name));
+    commandList.resize(numInstructions, std::make_shared<LogPrints>(pid, name));
 }
 
 void Process::executeCurrentCommand(int coreID)

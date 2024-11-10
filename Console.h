@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <windows.h>
-#include "ProcessManager.h"
+#include "Functions.h"
 
 class Console
 {

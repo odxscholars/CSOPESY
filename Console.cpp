@@ -113,12 +113,12 @@ void Console::handleCommand(const std::string &command)
         }
         else if (cmd == "scheduler-test")
         {
-            ProcessManager::getInstance().startBatch();
+            Functions::getInstance().startBatch();
             std::cout << "Batch process generation started.\n";
         }
         else if (cmd == "scheduler-stop")
         {
-            ProcessManager::getInstance().stopBatch();
+            Functions::getInstance().stopBatch();
             std::cout << "Batch process generation stopped.\n";
         }
         else if (cmd == "report-util")
@@ -150,7 +150,7 @@ void Console::handleCommand(const std::string &command)
     {
         if (cmd == "process-smi")
         {
-            auto process = ProcessManager::getInstance().getProcess(currentScreen);
+            auto process = Functions::getInstance().getProcess(currentScreen);
             if (process)
             {
                 process->displayProcessInfo();
@@ -193,7 +193,7 @@ void Console::handleScreenCommand(const std::string &screenCommand, const std::s
 
         try
         {
-            ProcessManager::getInstance().generateProcess(processName);
+            Functions::getInstance().generateProcess(processName);
             clearScreen();
             currentScreen = processName;
 
@@ -205,7 +205,7 @@ void Console::handleScreenCommand(const std::string &screenCommand, const std::s
 
             displayDivider();
 
-            auto process = ProcessManager::getInstance().getProcess(processName);
+            auto process = Functions::getInstance().getProcess(processName);
             if (process)
             {
                 process->displayProcessInfo();
@@ -219,7 +219,7 @@ void Console::handleScreenCommand(const std::string &screenCommand, const std::s
     }
     else if (screenCommand == "-r")
     {
-        auto process = ProcessManager::getInstance().getProcess(processName);
+        auto process = Functions::getInstance().getProcess(processName);
         if (process && process->getState() != Process::FINISHED)
         {
             clearScreen();
@@ -245,7 +245,7 @@ void Console::handleScreenCommand(const std::string &screenCommand, const std::s
         std::cout << "          Active Processes List          \n";
         std::cout << "=========================================\n";
         
-        ProcessManager::getInstance().listProcesses();
+        Functions::getInstance().listProcesses();
         
         std::cout << "=========================================\n\n";
     }
@@ -278,7 +278,7 @@ void Console::displayProcessScreen(const std::string &processName)
               << "║  • exit        - Return to main menu   ║\n"
               << "╚════════════════════════════════════════╝\n\n";
 
-    if (auto process = ProcessManager::getInstance().getProcess(processName))
+    if (auto process = Functions::getInstance().getProcess(processName))
     {
         std::cout << "Process Details:\n";
         std::cout << "────────────────────────────────────────\n";

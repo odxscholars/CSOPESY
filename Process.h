@@ -8,7 +8,7 @@
 #include <mutex>
 #include "CommandManager.h"
 #include "Config.h"
-#include "PrintCommand.h"
+#include "LogPrints.h"
 
 class Process
 {
