@@ -6,7 +6,7 @@
 #include <memory>
 #include <atomic>
 #include <thread>
-#include "headers/Process.h"
+#include "Process.h"
 #include "Scheduler.h"
 
 class ProcessManager

@@ -1,6 +1,6 @@
-#include "headers/Process.h"
-#include "headers/PrintCommand.h"
-#include "headers/Utils.h"
+#include "Process.h"
+#include "PrintCommand.h"
+#include "Utils.h"
 
 #include <iostream>
 #include <random>
@@ -56,6 +56,11 @@ void Process::displayProcessInfo()
     std::cout << name << " (" << formatTimestamp(creationTime) << ") ";
     std::cout << (state == FINISHED ? "Finished   " : "Core: " + std::to_string(cpuCoreID) + "    ")
               << commandCounter << " / " << commandList.size() << "\n";
+}
+void Process::moveToNextLine()
+{
+    if (commandCounter < commandList.size()) ++commandCounter;
+    
 }
 
 int Process::getPID() const { return pid; }

@@ -1,5 +1,5 @@
-#include "headers/PrintCommand.h"
-#include "headers/Console.h"
+#include "PrintCommand.h"
+#include "Console.h"
 
 #include <fstream>
 #include <iostream>
@@ -14,7 +14,7 @@
 // }
 
 PrintCommand::PrintCommand(int pid, const std::string &processName)
-    : Command(pid, CommandType::PRINT), processName(processName)
+    : CommandManager(pid, CommandType::PRINT), processName(processName)
 {
 }
 

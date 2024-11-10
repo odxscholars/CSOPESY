@@ -1,5 +1,5 @@
-#include "headers/Scheduler.h"
-#include "headers/Utils.h"
+#include "Scheduler.h"
+#include "Utils.h"
 
 #include <iostream>
 #include <iomanip>

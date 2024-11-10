@@ -1,5 +1,5 @@
-#include "headers/Console.h"
-#include "headers/Config.h"
+#include "Console.h"
+#include "Config.h"
 
 #include <iostream>
 #include <sstream>

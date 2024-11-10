@@ -8,7 +8,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <vector>
-#include "headers/Process.h"
+#include "Process.h"
 #include "Config.h"
 
 class Scheduler
