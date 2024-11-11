@@ -100,8 +100,6 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
         }
         currentProcess->endTime = std::time(nullptr);
 
-        // std::cout << "CPU " << cpuIndex << " processed " << currentProcess->getProcessName() << " for " << currentProcess->getInstructionsDone() <<
-        //           " instructions.\n";
 
 
 

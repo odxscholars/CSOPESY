@@ -109,30 +109,16 @@ std::string Console::generateReport() {
       coreUsed++;
     }
   }
-  cpuUtil = (coreUsed / coreCount) * 100;
+  cpuUtil = (static_cast<double>(coreUsed) / (coreAvailable + coreUsed)) * 100;
 
   report << "CPU utiliziation: " << cpuUtil << "%";
   report << "\nCores used: " << coreUsed;
   report << "\nCores available: " << coreAvailable << "\n";
   report << "-----------------------------------------------------------\n";
 
-  /*report << "Existing custom processes: \n";*/
-  /*for (const std::string &screen : existingSessions) {*/
-  /*  report << numbering << ": " << screen << "\n";*/
-  /*  numbering++;*/
-  /*}*/
+
   report << "\n\nRunning Processes: \n";
-  // for (const auto &process : *processVector) {
-  //   if (process->getRunning() == true) {
-  //     report << process->getProcessName() << "\t("
-  //            << std::put_time(std::localtime(&process->startTime),
-  //                             "%Y-%m-%d %H:%M:%S")
-  //            << ")\t Core: " << process->getCoreAssigned() << "\t "
-  //            << process->getInstructionsDone() << "/"
-  //            << process->getInstructionsTotal() << "\n";
-  //   }
-  // }
-  //iterate through the coreVector
+
   for (const auto &core : *coreVector) {
     if (core.isRunning) {
       report << core.process->getProcessName() << "\t("
@@ -254,15 +240,11 @@ void Console::processCommand(const std::string &command, bool &session) {
           }
         }
       }
-      // screenCommand.processScreenCommand(option, screenName);
+
     }
   } else if (command == "scheduler-test") {
     scheduler->startSchedulerTest();
-    // if (scheduler) {
-    //     // scheduler->startSchedulerTest();
-    // } else {
-    //     std::cout << "Scheduler not initialized.\n";
-    // }
+
   } else if (command == "scheduler-stop") {
     scheduler->stopSchedulerTest();
     // if (scheduler) {
@@ -291,9 +273,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     displayMainMenu();
   } else if (command == "exit") {
     std::cout << "Exiting the application.\n";
-    // if (scheduler) {
-    //     delete scheduler;
-    // }
+
     exit(0);
   } else {
     std::cout << "Unknown command. Try again.\n";
