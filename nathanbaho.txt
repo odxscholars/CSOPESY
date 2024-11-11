@@ -22,3 +22,12 @@ Running processes:
 Finished processes:
 1 (11/11/2024 01:17:21)   Finished    100 / 100
 
+CPU utilization: 0%
+Cores used: 0
+Cores available: 2
+
+Running processes:
+
+Finished processes:
+1 (11/11/2024 02:20:33)   Finished    100 / 100
+

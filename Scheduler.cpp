@@ -221,6 +221,47 @@ std::shared_ptr<Process> Scheduler::RR()
     return process;
 }
 
+void Scheduler::generateMemorySnapshot(int quantumCycle) {
+    std::stringstream filename;
+    filename << "memory_stamp_" << quantumCycle << ".txt";
+    
+    std::ofstream file(filename.str());
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << filename.str() << " for writing." << std::endl;
+        return;
+    }
+
+    // Add the timestamp
+    auto timestamp = formatTimestamp(std::chrono::system_clock::now());
+    file << "TimeStamp: (" << timestamp << ")\n";
+    
+    // Collect memory information
+    int numProcesses = runningProcesses.size();  // Number of processes currently running
+    int totalMemory = Config::getInstance().getMaxOverallMem();
+    int memPerProcess = Config::getInstance().getMemPerProc();
+    int externalFragmentation = 0;
+
+    // Calculate fragmentation and prepare ASCII layout
+    int memoryUsed = 0;
+    file << "Number of processes in memory: " << numProcesses << "\n";
+    
+    for (const auto& process : runningProcesses) {
+        int upperLimit = memoryUsed + memPerProcess;
+        file << upperLimit << "\nP" << process->getPID() << "\n" << memoryUsed << "\n";
+        memoryUsed = upperLimit;
+    }
+
+    externalFragmentation = totalMemory - memoryUsed;
+    file << "Total external fragmentation in KB: " << externalFragmentation << "\n";
+    
+    // Print memory layout boundaries
+    file << "----end---- = " << totalMemory << "\n";
+    file << "----start---- = 0\n";
+    
+    file.close();
+    std::cout << "Memory snapshot created: " << filename.str() << std::endl;
+}
+
 
 bool Scheduler::quantumExpiration(const std::shared_ptr<Process> &process) const
 {
