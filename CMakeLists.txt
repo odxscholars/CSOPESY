@@ -13,4 +13,5 @@ add_executable(ownImplementation main.cpp
         headers/Scheduler.h
         Scheduler.cpp
         headers/MemoryManager.h
-        MemoryManager.cpp)
+        MemoryManager.cpp
+        Marquee.cpp)

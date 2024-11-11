@@ -13,7 +13,9 @@ void Process::setCoreAssigned(int core) {
 void Process::setDone(bool done) {
     isDone = done;
 }
-
+void Process::setScreenName(std::string screenName) {
+    this->screenName = screenName;
+}
 void Process::setRunning(bool running) {
     isRunning = running;
 }

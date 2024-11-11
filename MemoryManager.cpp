@@ -62,8 +62,9 @@ void MemoryManager::generateReport(const std::string &filename) {
     std::time_t now = std::time(nullptr);
     reportFile << "Timestamp: " << std::put_time(std::localtime(&now), "%Y-%m-%d %H:%M:%S") << "\n";
     reportFile << "Number of processes in memory: " << std::count_if(memoryBlocks.begin(), memoryBlocks.end(), [](const MemoryBlock &block) { return !block.processName.empty(); }) << "\n";
-    reportFile << "Total external fragmentation: " << calculateExternalFragmentation() / 1024 << " KB\n";
+    reportFile << "Total external fragmentation: " << calculateExternalFragmentation() << " KB\n";
     reportFile << "Memory Layout: ";
+
     for (const auto &block : memoryBlocks) {
         if (block.processName.empty()) {
             reportFile << "[Free: " << block.start << "-" << block.end << "]";
@@ -85,13 +86,23 @@ int MemoryManager::findFirstFit(int processSize) {
 }
 
 void MemoryManager::VisualizeMemory() {
+    time_t now = std::time(nullptr);
+    std::cout << "Timestamp: " << std::put_time(std::localtime(&now), "%Y-%m-%d %H:%M:%S") << std::endl;
+    std::cout << "Number of processes in memory: " << std::count_if(memoryBlocks.begin(), memoryBlocks.end(), [](const MemoryBlock &block) { return !block.processName.empty(); }) << std::endl;
+    std::cout << "Total external fragmentation: " << calculateExternalFragmentation() << " KB" << std::endl;
+    std::cout << "Memory Layout: " << std::endl;
+    std::cout << "----start---- = 0" << std::endl;
     for (const auto &block : memoryBlocks) {
         if (block.processName.empty()) {
-            std::cout << "[Free: " << block.start << "-" << block.end << "]";
+            // std::cout << "[Free: " << block.start << "-" << block.end << "]";
+            std::cout << "\n";
         } else {
-            std::cout << "[Process " << block.processName << ": " << block.start << "-" << block.end << "]";
+            std::cout << block.start << std::endl;
+            std::cout << block.processName << std::endl;
+            std::cout << block.end << "\n" <<std::endl;
         }
     }
+    std::cout << "----end---- = " << maxMemory<< std::endl;
     std::cout << std::endl;
 }
 

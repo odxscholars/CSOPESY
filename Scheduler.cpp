@@ -128,19 +128,22 @@ void Scheduler::runRR(int cpuIndex) {
             }
 
             currentProcess = readyQueue.front();
+            if (currentProcess == nullptr) { //null check
+                continue;
+            }
+
             std::cout << "Next Process: " << currentProcess->getProcessName() << std::endl;
             readyQueue.pop();
         }
 
         {
-            std::lock_guard<std::mutex> lock(memoryManagerMutex); //will crash eventually without this
+            std::lock_guard<std::mutex> lock(memoryManagerMutex);
             if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
                 std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
                 addProcessToReadyQueue(currentProcess);
                 currentProcess = nullptr;
                 continue;
             }
-            //lock is released
         }
         std::cout << "passed checks" << std::endl;
         coreVector[cpuIndex].process = currentProcess;
@@ -183,6 +186,7 @@ void Scheduler::runRR(int cpuIndex) {
                 coreVector[cpuIndex].isIdle = true;
                 coreVector[cpuIndex].isRunning = false;
                 addProcessToReadyQueue(currentProcess);
+
                 currentProcess = nullptr;
             }
         }
@@ -213,6 +217,7 @@ void Scheduler::startThreads() {
 void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
+            this->memoryManager.VisualizeMemory();
             std::cout << "Ready Queue:" << std::endl;
             //print ready queue
             std::queue<Process *> tempQueue = readyQueue;

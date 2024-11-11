@@ -61,7 +61,6 @@ private:
     std::condition_variable cv;
     std::thread generateThread;
     MemoryManager memoryManager;
-    std::vector<Process *> finishedProcesses;
 };
 
 #endif //SCHEDULER_H
