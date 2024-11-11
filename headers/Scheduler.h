@@ -59,6 +59,9 @@ private:
     void updateCoreStatus(int coreID, bool active);
     void synchronization();
     void counter();
+
+    // week 8 additions
+    void generateMemorySnapshot(int quantumCycle);
     
     void incrementCPUCycles() { 
         ++cpuCycles; 
