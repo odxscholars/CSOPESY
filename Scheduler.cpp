@@ -22,8 +22,7 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector)
     // Initialize the coreVector
     for (int i = 0; i < numCores; ++i) {
         coreVector[i].coreIndex = i;
-        coreVector[i].isIdle = true;
-        coreVector[i].isRunning = false;
+        coreVector[i].state = CoreState::IDLE;
         coreVector[i].process = nullptr;
         coreVector[i].thread = nullptr;
     }
@@ -52,9 +51,6 @@ void Scheduler::generateDummyProcesses() {
         auto* newProcess = new Process("Process_" + std::to_string(processCounter));
         newProcess->setInstructionsTotal(generatedInstructions);
         newProcess->setWaiting(true);
-        // Print process name and memory address
-        // std::cout << "Generated Process: " << newProcess->getProcessName() << " with " << newProcess << std::endl;
-
         {
             std::lock_guard<std::mutex> lock(mtx);
             processVector->push_back(newProcess);
@@ -83,8 +79,7 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
         }
 
         coreVector[cpuIndex].process = currentProcess;
-        coreVector[cpuIndex].isIdle = false;
-        coreVector[cpuIndex].isRunning = true;
+        coreVector[cpuIndex].state = CoreState::RUNNING;
 
         currentProcess->setCoreAssigned(cpuIndex);
         currentProcess->setRunning(true);
@@ -108,8 +103,7 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
         currentProcess->setRunning(false);
         currentProcess->setDone(true);
         coreVector[cpuIndex].process = nullptr;
-        coreVector[cpuIndex].isIdle = true;
-        coreVector[cpuIndex].isRunning = false;
+        coreVector[cpuIndex].state = CoreState::IDLE;
 
 
         finishedProcesses.push_back(currentProcess);
@@ -138,7 +132,6 @@ void Scheduler::runRR(int cpuIndex) {
         {
             std::lock_guard<std::mutex> lock(memoryManagerMutex);
             if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
-                // std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
                 addProcessToReadyQueue(currentProcess);
                 currentProcess = nullptr;
                 continue;
@@ -146,8 +139,7 @@ void Scheduler::runRR(int cpuIndex) {
         }
         // std::cout << "passed checks" << std::endl;
         coreVector[cpuIndex].process = currentProcess;
-        coreVector[cpuIndex].isIdle = false;
-        coreVector[cpuIndex].isRunning = true;
+        coreVector[cpuIndex].state = CoreState::RUNNING;
 
         currentProcess->setCoreAssigned(cpuIndex);
         currentProcess->setRunning(true);
@@ -172,8 +164,7 @@ void Scheduler::runRR(int cpuIndex) {
             currentProcess->setRunning(false);
             currentProcess->setDone(true);
             coreVector[cpuIndex].process = nullptr;
-            coreVector[cpuIndex].isIdle = true;
-            coreVector[cpuIndex].isRunning = false;
+            coreVector[cpuIndex].state = CoreState::IDLE;
             memoryManager.deallocateMemory(currentProcess->getProcessName());
             finishedProcesses.push_back(currentProcess);
             currentProcess = nullptr;
@@ -182,8 +173,7 @@ void Scheduler::runRR(int cpuIndex) {
                 currentProcess->setRunning(false);
                 currentProcess->setWaiting(true);
                 coreVector[cpuIndex].process = nullptr;
-                coreVector[cpuIndex].isIdle = true;
-                coreVector[cpuIndex].isRunning = false;
+                coreVector[cpuIndex].state = CoreState::IDLE;
                 addProcessToReadyQueue(currentProcess);
 
                 currentProcess = nullptr;
@@ -197,18 +187,6 @@ void Scheduler::startThreads() {
     // Start the thread for generating dummy processes
     generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
     generateThread.detach();
-
-    //start the core threads from coreVector
-    // for (int i = 0; i < numCores; ++i) {
-    //     if (schedulingAlgorithm == "fcfs") {
-    //         coreVector[i].thread = new std::thread(&Scheduler::runFCFSScheduler, this, i);
-    //     } else if (schedulingAlgorithm == "rr") {
-    //         coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
-    //     }
-    //     coreVector[i].thread->detach();
-    // }
-
-    //start the task manager thread
     std::thread taskManagerThread(&Scheduler::taskManager, this);
     taskManagerThread.detach();
 }
@@ -226,10 +204,6 @@ void Scheduler::taskManager() {
             }
             //print a divider
             std::cout << "----------------" << std::endl;
-
-
-
-            //iterate through the coreVector and print the process name and instructions done
             for (int i = 0; i < numCores; ++i) {
                 if (coreVector[i].process != nullptr) {
                     std::cout << "CPU " << i << " " << coreVector[i].process->getProcessName() << " " << std::put_time(std::localtime(&coreVector[i].process->startTime), "%Y-%m-%d %H:%M:%S") << " " << coreVector[i].process->getInstructionsDone() << "/" << coreVector[i].process->getInstructionsTotal() << std::endl;

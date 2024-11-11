@@ -103,7 +103,7 @@ std::string Console::generateReport() {
   int coreAvailable = 0;
 
   for (const auto &core : *coreVector) {
-    if (core.isIdle) {
+    if (core.state == CoreState::IDLE) {
       coreAvailable++;
     } else {
       coreUsed++;
@@ -120,7 +120,7 @@ std::string Console::generateReport() {
   report << "\n\nRunning Processes: \n";
 
   for (const auto &core : *coreVector) {
-    if (core.isRunning) {
+    if (core.state == CoreState::RUNNING) {
       report << core.process->getProcessName() << "\t("
              << std::put_time(std::localtime(&core.process->startTime),
                               "%Y-%m-%d %H:%M:%S")
