@@ -21,6 +21,7 @@
 // #include "ScreenCommand.h"
 #include "headers/Config.h"
 #include "headers/Scheduler.h"
+#include "headers/Marquee.h"
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
@@ -253,7 +254,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     //     std::cout << "Scheduler not initialized.\n";
     // }
   } else if (command == "report-util") {
-    std::filesystem::path current_dir = std::filesystem::current_path();
+    // std::filesystem::path current_dir = std::filesystem::current_path();
     std::ofstream outputFile("csopesy-log.txt");
     std::cout << "Running report utility...\n";
 
@@ -264,6 +265,10 @@ void Console::processCommand(const std::string &command, bool &session) {
       std::cout << "Something went wrong while opening the file!!" << std::endl;
     }
 
+
+  } else if (command == "marquee") {
+    Marquee marquee;
+    marquee.startMarquee();
   } else if (command == "clear") {
     clearScreen();
     displayMainMenu();
