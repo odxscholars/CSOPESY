@@ -4,6 +4,8 @@
 
 #ifndef CONSOLE_H
 #define CONSOLE_H
+#include <bemapiset.h>
+
 #include "Process.h"
 #include <string>
 #include <vector>
@@ -23,6 +25,8 @@ public:
   Scheduler *scheduler;
 
 private:
+
+  Process * currentSessionProcess = nullptr;
   std::vector<std::string> existingSessions;
   int maxins, minins, coreCount;
   std::string sessionName;

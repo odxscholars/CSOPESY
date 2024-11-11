@@ -153,7 +153,6 @@ std::string Console::generateReport() {
 void Console::processCommand(const std::string &command, bool &session) {
   std::stringstream ss(command);
   std::string cmd, option, screenName;
-  Process *currentProcess;
   ss >> cmd >> option >> screenName;
 
   // bool started = false;
@@ -183,14 +182,14 @@ void Console::processCommand(const std::string &command, bool &session) {
     scheduler->bootStrapthreads();
   } else if (session) {
     if (cmd == "process-smi") {
-      if (currentProcess->getDone() == false) {
-        processSMI(*currentProcess);
+      if (currentSessionProcess->getDone() == false) {
+        processSMI(*currentSessionProcess);
       } else {
         std::cout << "Finished!";
       }
     } else if (cmd == "exit") {
       session = false;
-      currentProcess = nullptr;
+      currentSessionProcess = nullptr;
       sessionName = "";
       clearScreen();
     } else {
@@ -211,13 +210,13 @@ void Console::processCommand(const std::string &command, bool &session) {
           existingSessions.push_back(sessionName);
 
           Process *newProcess = new Process(screenName);
-          currentProcess = newProcess;
+          currentSessionProcess = newProcess;
           newProcess->setScreenName(screenName);
           newProcess->setInstructionsTotal(rand() % (maxins - minins + 1) +
                                            minins);
           scheduler->addCustomProcess(newProcess);
           clearScreen();
-          processSMI(*currentProcess);
+          processSMI(*currentSessionProcess);
         } else {
           std::cout << "Custom Process already exists";
         }
@@ -232,10 +231,10 @@ void Console::processCommand(const std::string &command, bool &session) {
         for (const auto &process : *processVector) {
           if (screenName == process->getScreenName()) {
             session = true;
-            currentProcess = process;
+            currentSessionProcess = process;
             sessionName = process->getScreenName();
             clearScreen();
-            processSMI(*currentProcess);
+            processSMI(*currentSessionProcess);
             break;
           }
         }
