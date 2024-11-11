@@ -122,14 +122,29 @@ std::string Console::generateReport() {
   /*  numbering++;*/
   /*}*/
   report << "\n\nRunning Processes: \n";
-  for (const auto &process : *processVector) {
-    if (process->getRunning() == true) {
-      report << process->getProcessName() << "\t("
-             << std::put_time(std::localtime(&process->startTime),
+  // for (const auto &process : *processVector) {
+  //   if (process->getRunning() == true) {
+  //     report << process->getProcessName() << "\t("
+  //            << std::put_time(std::localtime(&process->startTime),
+  //                             "%Y-%m-%d %H:%M:%S")
+  //            << ")\t Core: " << process->getCoreAssigned() << "\t "
+  //            << process->getInstructionsDone() << "/"
+  //            << process->getInstructionsTotal() << "\n";
+  //   }
+  // }
+  //iterate through the coreVector
+  for (const auto &core : *coreVector) {
+    if (core.isRunning) {
+      report << core.process->getProcessName() << "\t("
+             << std::put_time(std::localtime(&core.process->startTime),
                               "%Y-%m-%d %H:%M:%S")
-             << ")\t Core: " << process->getCoreAssigned() << "\t "
-             << process->getInstructionsDone() << "/"
-             << process->getInstructionsTotal() << "\n";
+             << ")\t Core: " << core.process->getCoreAssigned() << "\t "
+             << core.process->getInstructionsDone() << "/"
+             << core.process->getInstructionsTotal() << "\n";
+    }else {
+      //print "CPU {} Idle"
+      report << "CPU " << core.coreIndex << " Idle\n";
+
     }
   }
 
@@ -179,6 +194,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     this->coreVector =
         scheduler->getCoreVector(); // IMPORTANT: This is a pointer to the
                                     // coreVector in Scheduler
+    scheduler->bootStrapthreads();
   } else if (session) {
     if (cmd == "process-smi") {
       if (currentProcess->getDone() == false) {
@@ -248,6 +264,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     //     std::cout << "Scheduler not initialized.\n";
     // }
   } else if (command == "scheduler-stop") {
+    scheduler->stopSchedulerTest();
     // if (scheduler) {
     //     scheduler->stopSchedulerTest();
     // } else {
