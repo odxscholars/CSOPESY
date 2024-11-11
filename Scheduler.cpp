@@ -132,20 +132,20 @@ void Scheduler::runRR(int cpuIndex) {
                 continue;
             }
 
-            std::cout << "Next Process: " << currentProcess->getProcessName() << std::endl;
+            // std::cout << "Next Process: " << currentProcess->getProcessName() << std::endl;
             readyQueue.pop();
         }
 
         {
             std::lock_guard<std::mutex> lock(memoryManagerMutex);
             if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
-                std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
+                // std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
                 addProcessToReadyQueue(currentProcess);
                 currentProcess = nullptr;
                 continue;
             }
         }
-        std::cout << "passed checks" << std::endl;
+        // std::cout << "passed checks" << std::endl;
         coreVector[cpuIndex].process = currentProcess;
         coreVector[cpuIndex].isIdle = false;
         coreVector[cpuIndex].isRunning = true;
@@ -249,6 +249,23 @@ void Scheduler::taskManager() {
         std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
     }
 }
+
+void Scheduler::stopSchedulerTest() {
+    schedulerTestRunning = false;
+}
+
+void Scheduler::bootStrapthreads() {
+    //start the scheduler thread
+    for (int i = 0; i < numCores; ++i) {
+        if (schedulingAlgorithm == "fcfs") {
+            coreVector[i].thread = new std::thread(&Scheduler::runFCFSScheduler, this, i);
+        } else if (schedulingAlgorithm == "rr") {
+            coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
+        }
+        coreVector[i].thread->detach();
+    }
+}
+
 
 std::vector<Core> *Scheduler::getCoreVector() {
     return &coreVector;

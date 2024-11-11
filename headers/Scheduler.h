@@ -36,6 +36,10 @@ public:
 
   void taskManager();
 
+  void stopSchedulerTest();
+
+  void bootStrapthreads();
+
   std::vector<Core> *getCoreVector();
 
   int globalExecDelay = 0;
