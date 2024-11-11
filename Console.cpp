@@ -160,7 +160,18 @@ void Console::processCommand(const std::string &command, bool &session) {
   // static Scheduler* scheduler = nullptr;
 
   if (!isInitialized && command != "initialize" && command != "exit") {
+
+    if (command == "clear") {
+      clearScreen();
+      displayMainMenu();
+    }
+
+    else {
+
     std::cout << "Initialize First.\n";
+
+    }
+    
     return;
   }
 
