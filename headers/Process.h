@@ -17,6 +17,7 @@ public:
     void setDone(bool done);
     void setRunning( bool running);
     void setWaiting( bool waiting);
+    void setScreenName(std::string screenName);
 
 
 
@@ -35,6 +36,7 @@ public:
 
 
     int getInstructionsTotal() const;
+    std::string getScreenName() const;
 
 
 
@@ -52,6 +54,7 @@ public:
 private:
 
     std::string processName;
+    std::string screenName;
     int coreAssigned = -1;
 
     //BOOLEAN FLAGS

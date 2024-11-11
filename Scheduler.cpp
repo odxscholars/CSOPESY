@@ -19,6 +19,7 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector)
     this->globalExecDelay = (delaysPerExecution + 1) * 100;
 
     coreVector.resize(numCores);
+    // Initialize the coreVector
     for (int i = 0; i < numCores; ++i) {
         coreVector[i].isIdle = true;
         coreVector[i].isRunning = false;
@@ -34,6 +35,16 @@ void Scheduler::addProcessToReadyQueue( Process * process) {
     }
     cv.notify_one(); // Notify outside the lock
 }
+
+void Scheduler::addCustomProcess(Process *process) {
+  {
+    std::lock_guard<std::mutex> lock(mtx);
+    readyQueue.push(process);
+    processVector->push_back(process);
+  }
+  cv.notify_one();
+}
+
 void Scheduler::generateDummyProcesses() {
     while (schedulerTestRunning) {
         int generatedInstructions = rand() % (maxInstructions - minimumInstructions + 1) + minimumInstructions;
@@ -203,17 +214,23 @@ void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
             std::cout << "Ready Queue:" << std::endl;
-            std::queue<Process*> tempQueue = readyQueue;
+            //print ready queue
+            std::queue<Process *> tempQueue = readyQueue;
             while (!tempQueue.empty()) {
-                std::cout << tempQueue.front()->getProcessName() << std::endl;
+                std::cout << tempQueue.front()->getProcessName() <<  std::endl;
                 tempQueue.pop();
             }
+            //print a divider
             std::cout << "----------------" << std::endl;
 
+
+
+            //iterate through the coreVector and print the process name and instructions done
             for (int i = 0; i < numCores; ++i) {
                 if (coreVector[i].process != nullptr) {
                     std::cout << "CPU " << i << " " << coreVector[i].process->getProcessName() << " " << std::put_time(std::localtime(&coreVector[i].process->startTime), "%Y-%m-%d %H:%M:%S") << " " << coreVector[i].process->getInstructionsDone() << "/" << coreVector[i].process->getInstructionsTotal() << std::endl;
-                } else {
+                }else {
+                    //print idle
                     std::cout << "CPU " << i << " Idle" << std::endl;
                 }
             }
@@ -224,8 +241,6 @@ void Scheduler::taskManager() {
             }
             std::cout << "----------------" << std::endl;
         }
-        memoryManager.generateReport("report.txt");
-        memoryManager.VisualizeMemory();
         std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
     }
 }

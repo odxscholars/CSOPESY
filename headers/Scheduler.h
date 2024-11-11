@@ -6,9 +6,12 @@
 #include "MemoryManager.h"
 #include <vector>
 #include <queue>
+#include <string>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "Process.h"
+#include "Config.h"
 struct Core {
     std::thread* thread;
     Process* process;
@@ -19,38 +22,46 @@ struct Core {
 };
 class Scheduler {
 public:
-    Scheduler(Config config, std::vector<Process*>* processVector);
-    void addProcessToReadyQueue(Process* process);
-    void startSchedulerTest();
-    std::vector<Core>* getCoreVector();
+  Scheduler(Config config, std::vector<Process *> *processVector);
+
+  void addProcessToReadyQueue(Process *process);
+  void addCustomProcess(Process *process);
+  void generateDummyProcesses();
+  void startSchedulerTest();
+  void runFCFSScheduler(int cpuIndex);
+
+  void runRR(int cpuIndex);
+
+  void startThreads();
+
+  void taskManager();
+
+  std::vector<Core> *getCoreVector();
+
+  int globalExecDelay = 0;
 
 private:
-    void generateDummyProcesses();
-    void runFCFSScheduler(int cpuIndex);
-    void runRR(int cpuIndex);
-    void startThreads();
-    void taskManager();
+  std::queue<Process *> readyQueue;
+  std::vector<Process *> *processVector;
+  std::vector<Core> coreVector;
+  int numCores;
+  std::string schedulingAlgorithm;
+  int quantumCycles;
+  int batchProcessFrequency;
+  int minimumInstructions;
+  int maxInstructions;
+  int delaysPerExecution;
 
-    int numCores;
-    std::string schedulingAlgorithm;
-    int quantumCycles;
-    int batchProcessFrequency;
-    int minimumInstructions;
-    int maxInstructions;
-    int delaysPerExecution;
-    int globalExecDelay;
-    bool schedulerTestRunning = false;
-    int processCounter = 0;
+  bool schedulerTestRunning = false;
+  int processCounter = 0;
 
-    std::vector<Core> coreVector;
-    std::vector<Process*>* processVector;
-    std::queue<Process*> readyQueue;
     std::vector<Process*> finishedProcesses;
     std::mutex mtx;
     std::mutex memoryManagerMutex;
     std::condition_variable cv;
     std::thread generateThread;
     MemoryManager memoryManager;
+    std::vector<Process *> finishedProcesses;
 };
 
-#endif // SCHEDULER_H
+#endif //SCHEDULER_H

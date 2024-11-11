@@ -22,7 +22,6 @@ void Process::setWaiting(bool waiting) {
     isWaiting = waiting;
 }
 
-
 void Process::setInstructionsTotal(int instructions) {
     instructionsTotal = instructions;
 }
@@ -50,6 +49,8 @@ bool Process::getRunning() const {
 bool Process::getWaiting() const {
     return isWaiting;
 }
+
+std::string Process::getScreenName() const { return screenName; }
 
 
 int Process::getInstructionsTotal() const {
