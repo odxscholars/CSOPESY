@@ -21,6 +21,7 @@ Scheduler::Scheduler(Config config, std::vector<Process*>* processVector)
     coreVector.resize(numCores);
     // Initialize the coreVector
     for (int i = 0; i < numCores; ++i) {
+        coreVector[i].coreIndex = i;
         coreVector[i].isIdle = true;
         coreVector[i].isRunning = false;
         coreVector[i].process = nullptr;
@@ -118,12 +119,12 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
 }
 void Scheduler::runRR(int cpuIndex) {
     Process* currentProcess = nullptr;
-    while (schedulerTestRunning || !readyQueue.empty()) {
+    while (threadsContinue) {
         if (currentProcess == nullptr) {
             std::unique_lock<std::mutex> lock(mtx);
-            cv.wait(lock, [this] { return !readyQueue.empty() || !schedulerTestRunning; });
+            cv.wait(lock, [this] { return !readyQueue.empty() || !threadsContinue; });
 
-            if (!schedulerTestRunning && readyQueue.empty()) {
+            if (!threadsContinue && readyQueue.empty()) {
                 return;
             }
 
@@ -200,14 +201,14 @@ void Scheduler::startThreads() {
     generateThread.detach();
 
     //start the core threads from coreVector
-    for (int i = 0; i < numCores; ++i) {
-        if (schedulingAlgorithm == "fcfs") {
-            coreVector[i].thread = new std::thread(&Scheduler::runFCFSScheduler, this, i);
-        } else if (schedulingAlgorithm == "rr") {
-            coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
-        }
-        coreVector[i].thread->detach();
-    }
+    // for (int i = 0; i < numCores; ++i) {
+    //     if (schedulingAlgorithm == "fcfs") {
+    //         coreVector[i].thread = new std::thread(&Scheduler::runFCFSScheduler, this, i);
+    //     } else if (schedulingAlgorithm == "rr") {
+    //         coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
+    //     }
+    //     coreVector[i].thread->detach();
+    // }
 
     //start the task manager thread
     std::thread taskManagerThread(&Scheduler::taskManager, this);
@@ -255,6 +256,7 @@ void Scheduler::stopSchedulerTest() {
 }
 
 void Scheduler::bootStrapthreads() {
+    threadsContinue = true;
     //start the scheduler thread
     for (int i = 0; i < numCores; ++i) {
         if (schedulingAlgorithm == "fcfs") {

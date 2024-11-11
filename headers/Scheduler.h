@@ -13,6 +13,7 @@
 #include "Process.h"
 #include "Config.h"
 struct Core {
+    int coreIndex;
     std::thread* thread;
     Process* process;
     bool isRunning = false;
@@ -56,6 +57,8 @@ private:
   int maxInstructions;
   int delaysPerExecution;
 
+
+  bool threadsContinue = false;
   bool schedulerTestRunning = false;
   int processCounter = 0;
 
