@@ -20,8 +20,8 @@
 
 // #include "ScreenCommand.h"
 #include "headers/Config.h"
-#include "headers/Scheduler.h"
 #include "headers/Marquee.h"
+#include "headers/Scheduler.h"
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
@@ -116,7 +116,6 @@ std::string Console::generateReport() {
   report << "\nCores available: " << coreAvailable << "\n";
   report << "-----------------------------------------------------------\n";
 
-
   report << "\n\nRunning Processes: \n";
 
   for (const auto &core : *coreVector) {
@@ -127,10 +126,9 @@ std::string Console::generateReport() {
              << ")\t Core: " << core.process->getCoreAssigned() << "\t "
              << core.process->getInstructionsDone() << "/"
              << core.process->getInstructionsTotal() << "\n";
-    }else {
-      //print "CPU {} Idle"
+    } else {
+      // print "CPU {} Idle"
       report << "CPU " << core.coreIndex << " Idle\n";
-
     }
   }
 
@@ -168,10 +166,9 @@ void Console::processCommand(const std::string &command, bool &session) {
 
     else {
 
-    std::cout << "Initialize First.\n";
-
+      std::cout << "Initialize First.\n";
     }
-    
+
     return;
   }
 
@@ -199,6 +196,17 @@ void Console::processCommand(const std::string &command, bool &session) {
         std::cout << "Finished!";
       }
     } else if (cmd == "exit") {
+      if (currentSessionProcess->getDone() == true) {
+        existingSessions.erase(
+            std::remove(existingSessions.begin(), existingSessions.end(),
+                        currentSessionProcess->getScreenName()),
+            existingSessions.end());
+        processVector->erase(
+            std::remove_if(processVector->begin(), processVector->end(),
+                           [&](const Process *process) {
+                             return process->getScreenName() == sessionName;
+                           }));
+      }
       session = false;
       currentSessionProcess = nullptr;
       sessionName = "";
@@ -250,7 +258,6 @@ void Console::processCommand(const std::string &command, bool &session) {
           }
         }
       }
-
     }
   } else if (command == "scheduler-test") {
     scheduler->startSchedulerTest();
@@ -273,7 +280,6 @@ void Console::processCommand(const std::string &command, bool &session) {
     } else {
       std::cout << "Something went wrong while opening the file!!" << std::endl;
     }
-
 
   } else if (command == "marquee") {
     Marquee marquee;

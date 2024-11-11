@@ -1,14 +1,14 @@
-CPU utiliziation: 0%
-Cores used: 0
-Cores available: 4
+CPU utiliziation: 100%
+Cores used: 4
+Cores available: 0
 -----------------------------------------------------------
 
 
 Running Processes: 
-CPU 0 Idle
-CPU 1 Idle
-CPU 2 Idle
-CPU 3 Idle
+Process_0	(2024-11-12 06:07:33)	 Core: 0	 1/132
+Process_1	(2024-11-12 06:07:33)	 Core: 1	 1/132
+Process_2	(2024-11-12 06:07:33)	 Core: 2	 1/154
+Process_3	(2024-11-12 06:07:33)	 Core: 3	 1/112
 
 
 Finished Processes: 

@@ -1,0 +1,75 @@
+Timestamp: 2024-11-12 06:46:03
+Number of processes in memory: 1
+Total external fragmentation: 12288 KB
+Memory Layout: 
+----start---- = 0
+0
+Process_0
+4095
+
+
+----end---- = 16384
+
+
+Timestamp: 2024-11-12 06:46:03
+Number of processes in memory: 2
+Total external fragmentation: 8192 KB
+Memory Layout: 
+----start---- = 0
+0
+Process_0
+4095
+
+4096
+Process_1
+8191
+
+
+----end---- = 16384
+
+
+Timestamp: 2024-11-12 06:46:03
+Number of processes in memory: 3
+Total external fragmentation: 4096 KB
+Memory Layout: 
+----start---- = 0
+0
+Process_0
+4095
+
+4096
+Process_1
+8191
+
+8192
+Process_2
+12287
+
+
+----end---- = 16384
+
+
+Timestamp: 2024-11-12 06:46:03
+Number of processes in memory: 4
+Total external fragmentation: 0 KB
+Memory Layout: 
+----start---- = 0
+0
+Process_0
+4095
+
+4096
+Process_1
+8191
+
+8192
+Process_2
+12287
+
+12288
+Process_3
+16383
+
+----end---- = 16384
+
+
