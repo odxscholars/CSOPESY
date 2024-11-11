@@ -47,6 +47,7 @@ private:
     std::queue<Process*> readyQueue;
     std::vector<Process*> finishedProcesses;
     std::mutex mtx;
+    std::mutex memoryManagerMutex;
     std::condition_variable cv;
     std::thread generateThread;
     MemoryManager memoryManager;

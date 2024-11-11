@@ -121,13 +121,17 @@ void Scheduler::runRR(int cpuIndex) {
             readyQueue.pop();
         }
 
-        if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
-            std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
-            addProcessToReadyQueue(currentProcess);
-            currentProcess = nullptr;
-            continue;
+        {
+            std::lock_guard<std::mutex> lock(memoryManagerMutex); //will crash eventually without this
+            if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) && !memoryManager.allocateMemory(currentProcess->getProcessName(), memoryManager.memoryPerProcess)) {
+                std::cout << "Adding process back to ready queue: " << currentProcess->getProcessName() << std::endl;
+                addProcessToReadyQueue(currentProcess);
+                currentProcess = nullptr;
+                continue;
+            }
+            //lock is released
         }
-        std::cout << "pass" << std::endl;
+        std::cout << "passed checks" << std::endl;
         coreVector[cpuIndex].process = currentProcess;
         coreVector[cpuIndex].isIdle = false;
         coreVector[cpuIndex].isRunning = true;
