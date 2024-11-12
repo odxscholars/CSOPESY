@@ -58,7 +58,7 @@ void Config::displayConfig() const {
     std::cout << "Batch Process Frequency: " << batchProcessFreq << std::endl;
     std::cout << "Minimum Instructions: " << minIns << std::endl;
     std::cout << "Maximum Instructions: " << maxIns << std::endl;
-    // std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
+    std::cout << "Delays Per Execution: " << delaysPerExec << std::endl;
     std::cout << "Max Overall Memory: " << maxOverallMemory << std::endl;
     std::cout << "Memory Per Frame: " << memoryPerFrame << std::endl;
     std::cout << "Memory Per Process: " << memoryPerProcess << std::endl;
