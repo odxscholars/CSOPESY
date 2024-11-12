@@ -1,6 +1,7 @@
 #include "headers/MemoryManager.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <iomanip>
 #include <mutex>
 
@@ -57,7 +58,15 @@ bool MemoryManager::isProcessInMemory(const std::string &processName) {
 }
 
 void MemoryManager::generateReport(const std::string &filename) {
-  std::ofstream reportFile(filename, std::ios::app);
+  std::string folderPath =
+      "./memory_stamps"; // Relative path, or use "/memory_stamps" for absolute
+                         // path
+  if (!std::filesystem::exists(folderPath)) {
+    std::filesystem::create_directory(folderPath);
+  }
+
+  std::string filePath = folderPath + "/" + filename;
+  std::ofstream reportFile(filePath);
   if (!reportFile.is_open()) {
     throw std::runtime_error("Could not open report file");
   }

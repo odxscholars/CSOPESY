@@ -161,12 +161,8 @@ void Scheduler::runRR(int cpuIndex) {
     }
 
     for (int i = 0; i < quantum; ++i) {
-      std::stringstream formatName;
-
-      formatName << "memory_stamp_" << quantumCycles << ".txt";
 
       currentProcess->setInstructionsDone(executedInstructions + i + 1);
-      memoryManager.generateReport(formatName.str());
       std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
     }
 
@@ -198,7 +194,9 @@ void Scheduler::startThreads() {
   generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
   generateThread.detach();
   std::thread taskManagerThread(&Scheduler::taskManager, this);
+  std::thread reportGenerator(&Scheduler::generateReportPerCycle, this);
   taskManagerThread.detach();
+  reportGenerator.detach();
 }
 
 void Scheduler::taskManager() {
@@ -255,6 +253,20 @@ void Scheduler::bootStrapthreads() {
       coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
     }
     coreVector[i].thread->detach();
+  }
+}
+
+void Scheduler::generateReportPerCycle() {
+  int rr = 0;
+  while (schedulerTestRunning) {
+    std::stringstream formatName;
+    formatName << "memory_stamp_" << rr << ".txt";
+    {
+      std::lock_guard<std::mutex> lock(memoryManagerMutex);
+      memoryManager.generateReport(formatName.str());
+    }
+    rr += quantumCycles;
+    std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
   }
 }
 
