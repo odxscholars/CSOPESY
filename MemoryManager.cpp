@@ -61,9 +61,9 @@ void MemoryManager::generateReport(const std::string &filename) {
   std::string folderPath =
       "./memory_stamps"; // Relative path, or use "/memory_stamps" for absolute
                          // path
-  if (!std::filesystem::exists(folderPath)) {
-    std::filesystem::create_directory(folderPath);
-  }
+  // if (!std::filesystem::exists(folderPath)) {
+  //   std::filesystem::create_directory(folderPath);
+  // }
 
   std::string filePath = folderPath + "/" + filename;
   std::ofstream reportFile(filePath);
