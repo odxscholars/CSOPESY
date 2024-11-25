@@ -44,6 +44,8 @@ public:
 
   void generateReportPerCycle();
 
+  MemoryManager getMemoryManager();
+
   std::vector<Core> *getCoreVector();
 
   int globalExecDelay = 0;

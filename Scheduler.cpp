@@ -1,4 +1,5 @@
 #include "headers/Scheduler.h"
+#include "headers/MemoryManager.h"
 #include "headers/Process.h"
 #include <chrono>
 #include <cstdlib>
@@ -277,3 +278,5 @@ void Scheduler::startSchedulerTest() {
   schedulerTestRunning = true;
   startThreads();
 }
+
+MemoryManager Scheduler::getMemoryManager() { return memoryManager; }

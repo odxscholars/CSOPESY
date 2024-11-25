@@ -291,6 +291,36 @@ void Console::processCommand(const std::string &command, bool &session) {
     std::cout << "Exiting the application.\n";
 
     exit(0);
+  } else if (command == "process-smi") {
+
+    int cpuUtil = 0;
+    int coreUsed = 0;
+    int coreAvailable = 0;
+
+    for (const auto &core : *coreVector) {
+      if (core.state == CoreState::IDLE) {
+        coreAvailable++;
+      } else {
+        coreUsed++;
+      }
+    }
+    cpuUtil =
+        (static_cast<double>(coreUsed) / (coreAvailable + coreUsed)) * 100;
+    std::cout
+        << "------------------------------------------------------------\n";
+    std::cout
+        << "|         PROCESS-SMI V01.00 Driver Version: 01.00         |\n";
+    std::cout
+        << "------------------------------------------------------------\n";
+    std::cout << "CPU-Util: " << cpuUtil << "%\n";
+    std::cout << "Memory Usage: "
+              << scheduler->getMemoryManager().getMemoryUsage() << "MiB/"
+              << scheduler->getMemoryManager().maxMemory << "MiB\n";
+    std::cout << "Memory Util\n";
+    std::cout
+        << "============================================================\n";
+    std::cout << "Running Processes and Memory Usage: \n"
+              << scheduler->getMemoryManager().getProcessMemoryBlocks();
   } else {
     std::cout << "Unknown command. Try again.\n";
   }

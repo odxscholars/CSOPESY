@@ -148,3 +148,38 @@ int MemoryManager::calculateExternalFragmentation() {
   }
   return fragmentation;
 }
+
+std::string MemoryManager::getProcessMemoryBlocks() {
+  std::ostringstream report;
+  for (const auto &block : memoryBlocks) {
+    if (!block.processName.empty()) {
+      report << block.processName << " " << block.end - block.start << "MiB\n";
+    }
+  }
+  return report.str();
+}
+
+int MemoryManager::getMemoryUsage() {
+  int totalMemory;
+
+  /*for (const auto &block : memoryBlocks) {*/
+  /*  if (!block.processName.empty()) {*/
+  /*    totalMemory += block.end - block.start;*/
+  /*  }*/
+  /*}*/
+  return totalMemory;
+}
+
+double MemoryManager::getMemoryUtil() {
+  double totalMemoryUtil;
+  int totalMemory;
+
+  /*for (const auto &block : memoryBlocks) {*/
+  /*  if (!block.processName.empty()) {*/
+  /*    totalMemory += block.end - block.start;*/
+  /*  }*/
+  /*}*/
+
+  totalMemoryUtil = (static_cast<double>(totalMemory) / maxMemory) * 100;
+  return totalMemoryUtil;
+}
