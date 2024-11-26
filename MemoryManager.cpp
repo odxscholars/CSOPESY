@@ -5,9 +5,9 @@
 #include <iomanip>
 #include <mutex>
 
-MemoryManager::MemoryManager(int maxMemory, int frameSize, int memoryPerProcess)
+MemoryManager::MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess, int maxMemoryPerProcess)
     : maxMemory(maxMemory), frameSize(frameSize),
-      memoryPerProcess(memoryPerProcess) {
+      minMemoryPerProcess(minMemoryPerProcess) {
   memoryBlocks.push_back({0, maxMemory - 1, ""}); // Initial free block
 }
 

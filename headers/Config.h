@@ -20,7 +20,8 @@ public:
     int getDelaysPerExec() const;
     int getMaxOverallMemory() const;
     int getMemoryPerFrame() const;
-    int getMemoryPerProcess() const;
+    int getMinMemoryPerProcess() const;
+    int getMaxMemoryPerProcess() const;
 
 private:
     std::string filename;
@@ -33,7 +34,8 @@ private:
     int delaysPerExec;
     int maxOverallMemory;
     int memoryPerFrame;
-    int memoryPerProcess;
+    int minMemoryPerProcess;
+    int maxMemoryPerProcess;
 
 
     void parseLine(const std::string &line);

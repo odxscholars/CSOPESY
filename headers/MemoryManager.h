@@ -9,7 +9,7 @@
 
 class MemoryManager {
 public:
-  MemoryManager(int maxMemory, int frameSize, int memoryPerProcess);
+  MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess, int maxMemoryPerProcess);
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);
@@ -21,7 +21,8 @@ public:
   void VisualizeMemory();
   int maxMemory;
   int frameSize;
-  int memoryPerProcess;
+  int minMemoryPerProcess;
+  int maxMemoryPerProcess;
 
 private:
   struct MemoryBlock {
