@@ -3,8 +3,8 @@
 
 class Marquee {
 public:
-    Marquee();
-    void startMarquee(); 
+  Marquee();
+  void startMarquee();
 };
 
 #endif
