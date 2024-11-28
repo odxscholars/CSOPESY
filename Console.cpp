@@ -20,7 +20,6 @@
 
 // #include "ScreenCommand.h"
 #include "headers/Config.h"
-#include "headers/Marquee.h"
 #include "headers/Scheduler.h"
 #include <algorithm>
 #include <ctime>
@@ -83,7 +82,6 @@ void Console::displayMainMenu() {
   std::cout << "  'scheduler-test' - Test the scheduler\n";
   std::cout << "  'scheduler-stop' - Stop the scheduler\n";
   std::cout << "  'report-util'    - Run report utility\n";
-  std::cout << "  'marquee'        - Start the marquee application\n";
   std::cout << "  'clear'          - Clear the screen\n";
   std::cout << "  'exit'           - Exit the application\n";
 }
@@ -280,10 +278,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     } else {
       std::cout << "Something went wrong while opening the file!!" << std::endl;
     }
-
-  } else if (command == "marquee") {
-    Marquee marquee;
-    marquee.startMarquee();
+    
   } else if (command == "clear") {
     clearScreen();
     displayMainMenu();

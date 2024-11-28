@@ -12,7 +12,7 @@
 
 Scheduler::Scheduler(Config config, std::vector<Process *> *processVector)
     : memoryManager(config.getMaxOverallMemory(), config.getMemoryPerFrame(),
-                    config.getMemoryPerProcess()) {
+                    config.getMinMemoryPerProcess(), config.getMaxMemoryPerProcess()) {
   numCores = config.getNumCpu();
   schedulingAlgorithm = config.getScheduler();
   quantumCycles = config.getQuantumCycles();
@@ -139,7 +139,7 @@ void Scheduler::runRR(int cpuIndex) {
       std::lock_guard<std::mutex> lock(memoryManagerMutex);
       if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) &&
           !memoryManager.allocateMemory(currentProcess->getProcessName(),
-                                        memoryManager.memoryPerProcess)) {
+                                        memoryManager.minMemoryPerProcess)) {
         addProcessToReadyQueue(currentProcess);
         currentProcess = nullptr;
         continue;
