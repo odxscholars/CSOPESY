@@ -13,9 +13,9 @@
 
 Scheduler::Scheduler(Config config, std::vector<Process *> *processVector)
     : config(config), memoryManager(config.getMaxOverallMemory(), config.getMemoryPerFrame(),
-                              config.getMinMemoryPerProcess(),
-                              config.getMaxMemoryPerProcess(),
-                              config.getMemoryPerFrame()) {
+                                    config.getMinMemoryPerProcess(),
+                                    config.getMaxMemoryPerProcess(),
+                                    config.getMemoryPerFrame()) {
     numCores = config.getNumCpu();
     schedulingAlgorithm = config.getScheduler();
     quantumCycles = config.getQuantumCycles();
@@ -118,81 +118,79 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
 }
 
 void Scheduler::runRR(int cpuIndex) {
-  Process *currentProcess = nullptr;
-  while (threadsContinue) {
-    if (currentProcess == nullptr) {
-      std::unique_lock<std::mutex> lock(mtx);
-      cv.wait(lock, [this] { return !readyQueue.empty() || !threadsContinue; });
+    Process *currentProcess = nullptr;
+    while (threadsContinue) {
+        if (currentProcess == nullptr) {
+            std::unique_lock<std::mutex> lock(mtx);
+            cv.wait(lock, [this] { return !readyQueue.empty() || !threadsContinue; });
 
-      if (!threadsContinue && readyQueue.empty()) {
-        return;
-      }
+            if (!threadsContinue && readyQueue.empty()) {
+                return;
+            }
 
-      currentProcess = readyQueue.front();
-      if (currentProcess == nullptr) { // null check
-        continue;
-      }
+            currentProcess = readyQueue.front();
+            if (currentProcess == nullptr) {
+                // null check
+                continue;
+            }
 
-      // std::cout << "Next Process: " << currentProcess->getProcessName() <<
-      // std::endl;
-      readyQueue.pop();
+            // std::cout << "Next Process: " << currentProcess->getProcessName() <<
+            // std::endl;
+            readyQueue.pop();
+        } {
+            std::lock_guard<std::mutex> lock(memoryManagerMutex);
+            //TODO: I think `memoryManager.minMemoryPerProcess` is not correct. Should be referring to Process memorySize
+            if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) &&
+                !memoryManager.allocateMemory(currentProcess->getProcessName(),
+                                              currentProcess->getProcessSize())) {
+                addProcessToReadyQueue(currentProcess);
+                currentProcess = nullptr;
+                continue;
+            }
+        }
+        // std::cout << "passed checks" << std::endl;
+        coreVector[cpuIndex].process = currentProcess;
+        coreVector[cpuIndex].state = CoreState::RUNNING;
+
+        currentProcess->setCoreAssigned(cpuIndex);
+        currentProcess->setRunning(true);
+        currentProcess->setWaiting(false);
+
+        int instructions = currentProcess->getInstructionsTotal();
+        int executedInstructions = currentProcess->getInstructionsDone();
+        int remainingInstructions = instructions - executedInstructions;
+        int quantum = std::min(quantumCycles, remainingInstructions);
+
+        if (currentProcess->startTime == 0) {
+            currentProcess->startTime = std::time(nullptr);
+        }
+
+        for (int i = 0; i < quantum; ++i) {
+            currentProcess->setInstructionsDone(executedInstructions + i + 1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
+        }
+
+        if (currentProcess->getInstructionsDone() == instructions) {
+            currentProcess->endTime = std::time(nullptr);
+            currentProcess->setRunning(false);
+            currentProcess->setDone(true);
+            coreVector[cpuIndex].process = nullptr;
+            coreVector[cpuIndex].state = CoreState::IDLE;
+            memoryManager.deallocateMemory(currentProcess->getProcessName());
+            finishedProcesses.push_back(currentProcess);
+            currentProcess = nullptr;
+        } else {
+            if (!readyQueue.empty()) {
+                currentProcess->setRunning(false);
+                currentProcess->setWaiting(true);
+                coreVector[cpuIndex].process = nullptr;
+                coreVector[cpuIndex].state = CoreState::IDLE;
+                addProcessToReadyQueue(currentProcess);
+
+                currentProcess = nullptr;
+            }
+        }
     }
-
-    {
-      std::lock_guard<std::mutex> lock(memoryManagerMutex);
-      //TODO: I think `memoryManager.minMemoryPerProcess` is not correct. Should be referring to Process memorySize
-      if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) &&
-          !memoryManager.allocateMemory(currentProcess->getProcessName(),
-                                        currentProcess->getProcessSize())) {
-        addProcessToReadyQueue(currentProcess);
-        currentProcess = nullptr;
-        continue;
-      }
-    }
-    // std::cout << "passed checks" << std::endl;
-    coreVector[cpuIndex].process = currentProcess;
-    coreVector[cpuIndex].state = CoreState::RUNNING;
-
-    currentProcess->setCoreAssigned(cpuIndex);
-    currentProcess->setRunning(true);
-    currentProcess->setWaiting(false);
-
-    int instructions = currentProcess->getInstructionsTotal();
-    int executedInstructions = currentProcess->getInstructionsDone();
-    int remainingInstructions = instructions - executedInstructions;
-    int quantum = std::min(quantumCycles, remainingInstructions);
-
-    if (currentProcess->startTime == 0) {
-      currentProcess->startTime = std::time(nullptr);
-    }
-
-    for (int i = 0; i < quantum; ++i) {
-
-      currentProcess->setInstructionsDone(executedInstructions + i + 1);
-      std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
-    }
-
-    if (currentProcess->getInstructionsDone() == instructions) {
-      currentProcess->endTime = std::time(nullptr);
-      currentProcess->setRunning(false);
-      currentProcess->setDone(true);
-      coreVector[cpuIndex].process = nullptr;
-      coreVector[cpuIndex].state = CoreState::IDLE;
-      memoryManager.deallocateMemory(currentProcess->getProcessName());
-      finishedProcesses.push_back(currentProcess);
-      currentProcess = nullptr;
-    } else {
-      if (!readyQueue.empty()) {
-        currentProcess->setRunning(false);
-        currentProcess->setWaiting(true);
-        coreVector[cpuIndex].process = nullptr;
-        coreVector[cpuIndex].state = CoreState::IDLE;
-        addProcessToReadyQueue(currentProcess);
-
-        currentProcess = nullptr;
-      }
-    }
-  }
 }
 
 void Scheduler::runPagingRR(int cpuIndex) {
@@ -213,21 +211,17 @@ void Scheduler::runPagingRR(int cpuIndex) {
             }
             readyQueue.pop();
         } {
-            std::lock_guard<std::mutex> lock(memoryManagerMutex);
-            //CASE 1: If the process is not in memory and memory allocation fails because memory is full
+            std::unique_lock<std::mutex> lock(memoryManagerMutex);
+            // CASE 1: If the process is not in memory and memory allocation fails because memory is full
             int processPageReq = std::ceil(
                 static_cast<double>(currentProcess->getProcessSize()) / memoryManager.frameSize);
-            if (!memoryManager.isProcessinPagingMemory(currentProcess) &&
-                !memoryManager.pagingAllocate(currentProcess, processPageReq)) {
-                //IF memory allocation fails and not in memory, de-allocate oldest process and allocate current process
+            // std::cout << "processSize: " << std::ceil(static_cast<double>(currentProcess->getProcessSize())) << " frame size: " << memoryManager.frameSize << std::endl;
+            while (!memoryManager.isProcessinPagingMemory(currentProcess) &&
+                   !memoryManager.pagingAllocate(currentProcess, processPageReq)) {
+                // IF memory allocation fails and not in memory, de-allocate oldest process and allocate current process
                 addProcessToReadyQueue(currentProcess);
                 currentProcess = nullptr;
-                continue;
-
-                //TODO: add backing store
-
-
-
+                cv.wait(lock); // Wait for a notification that memory might be available
             }
         }
         // std::cout << "passed checks" << std::endl;
@@ -290,7 +284,6 @@ void Scheduler::startThreads() {
 void Scheduler::taskManager() {
     while (schedulerTestRunning) {
         {
-            this->memoryManager.visualizeFrames();
             std::cout << "Ready Queue:" << std::endl;
             // print ready queue
             std::queue<Process *> tempQueue = readyQueue;
@@ -298,6 +291,7 @@ void Scheduler::taskManager() {
                 std::cout << tempQueue.front()->getProcessName() << std::endl;
                 tempQueue.pop();
             }
+            this->memoryManager.visualizeFrames();
             // print a divider
             std::cout << "----------------" << std::endl;
             for (int i = 0; i < numCores; ++i) {
@@ -337,10 +331,10 @@ void Scheduler::bootStrapthreads() {
         if (schedulingAlgorithm == "fcfs") {
             coreVector[i].thread =
                     new std::thread(&Scheduler::runFCFSScheduler, this, i);
-        } else if (schedulingAlgorithm == "rr" ) {
+        } else if (schedulingAlgorithm == "rr") {
             if (config.getMaxOverallMemory() == config.getMemoryPerFrame()) {
                 coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
-            }else {
+            } else {
                 std::cout << "Paging RR" << std::endl;
                 coreVector[i].thread = new std::thread(&Scheduler::runPagingRR, this, i);
             }

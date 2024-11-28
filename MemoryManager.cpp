@@ -34,8 +34,8 @@ bool MemoryManager::pagingAllocate(Process *process,
     //get unix timestamp
     std::time_t timestamp = std::time(nullptr);
 
-    std::cout << "Allocating " << processPageReq << " pages for process "
-              << process->getProcessName() << std::endl;
+    // std::cout << "Allocating " << processPageReq << " pages for process "
+    //           << process->getProcessName() << std::endl;
 
     if (freeFrameList.empty()) {
         return false;
@@ -56,7 +56,7 @@ bool MemoryManager::pagingAllocate(Process *process,
         return true;
     }
 
-    for (int i = 1; i < processPageReq; i++) {
+    for (int i = 1; i <= processPageReq ; i++) {
         int page = freeFrameList.front();
         freeFrameList.erase(freeFrameList.begin());
 
@@ -304,18 +304,19 @@ double MemoryManager::getMemoryUtil() {
     return totalMemoryUtil;
 }
 void MemoryManager::visualizeFrames() {
-    std::cout << "+---------+----------------+----------------+---------------------+" << std::endl;
-    std::cout << "| Frame # | Process Name   | Process Page   | Timestamp           |" << std::endl;
-    std::cout << "+---------+----------------+----------------+---------------------+" << std::endl;
+    std::cout << "+---------+----------------+----------------+---------------------+--------------+" << std::endl;
+    std::cout << "| Frame # | Process Name   | Process Page   | Timestamp           | Process Size |" << std::endl;
+    std::cout << "+---------+----------------+----------------+---------------------+--------------+" << std::endl;
 
     for (const auto &pair : processFrameMap) {
         const Frame &frame = pair.second;
         std::cout << "| " << std::setw(7) << pair.first << " | "
                   << std::setw(14) << (frame.processName.empty() ? "Free" : frame.processName) << " | "
                   << std::setw(14) << (frame.processPage == -1 ? "N/A" : std::to_string(frame.processPage)) << " | "
-                  << std::setw(19) << (frame.timestamp == 0 ? "N/A" : std::to_string(frame.timestamp)) << " |"
+                  << std::setw(19) << (frame.timestamp == 0 ? "N/A" : std::to_string(frame.timestamp)) << " | "
+                  << std::setw(12) << (frame.processPtr == nullptr ? "N/A" : std::to_string(frame.processPtr->getProcessSize())) << " |"
                   << std::endl;
     }
 
-    std::cout << "+---------+----------------+----------------+---------------------+" << std::endl;
+    std::cout << "+---------+----------------+----------------+---------------------+--------------+" << std::endl;
 }
