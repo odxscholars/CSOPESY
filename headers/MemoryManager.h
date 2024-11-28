@@ -26,14 +26,13 @@ public:
   int minMemoryPerProcess;
   int maxMemoryPerProcess;
 
-
-  //Paging stuff
+  // Paging stuff
 
   struct Frame {
     std::string processName;
     int processPage;
   };
-  std::vector<int> freeFrameLis;
+  std::vector<int> freeFrameList;
   std::unordered_map<int, Frame> processFrameMap;
 
 private:
@@ -48,13 +47,6 @@ private:
   int findFirstFit(int processSize);
 
   int calculateExternalFragmentation();
-
-
-
-
-
-
-
 };
 
 #endif // MEMORYMANAGER_H
