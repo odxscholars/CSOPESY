@@ -52,6 +52,7 @@ public:
 
   int globalExecDelay = 0;
   Config config;
+  std::condition_variable memoryCv;
 
 private:
   std::queue<Process *> readyQueue;
@@ -73,6 +74,9 @@ private:
   std::vector<Process *> finishedProcesses;
   std::mutex mtx;
   std::mutex memoryManagerMutex;
+  std::mutex allocateMemoryMutex;
+  std::mutex deallocateMemoryMutex;
+
   std::condition_variable cv;
   std::thread generateThread;
   MemoryManager memoryManager;

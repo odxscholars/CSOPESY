@@ -49,8 +49,8 @@ bool MemoryManager::pagingAllocate(Process *process,
         processFrameMap[page].timestamp = timestamp;
         processFrameMap[page].processPtr = process;
 
-        std::cout << "Allocated page " << page << " for process "
-                  << process->getProcessName() << std::endl;
+        // std::cout << "Allocated page " << page << " for process "
+        //           << process->getProcessName() << std::endl;
 
         process->pages.push_back(page);
         return true;

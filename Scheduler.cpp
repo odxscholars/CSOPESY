@@ -210,21 +210,34 @@ void Scheduler::runPagingRR(int cpuIndex) {
                 continue;
             }
             readyQueue.pop();
-        } {
-            std::unique_lock<std::mutex> lock(memoryManagerMutex);
-            // CASE 1: If the process is not in memory and memory allocation fails because memory is full
-            int processPageReq = std::ceil(
-                static_cast<double>(currentProcess->getProcessSize()) / memoryManager.frameSize);
-            // std::cout << "processSize: " << std::ceil(static_cast<double>(currentProcess->getProcessSize())) << " frame size: " << memoryManager.frameSize << std::endl;
-            while (!memoryManager.isProcessinPagingMemory(currentProcess) &&
-                   !memoryManager.pagingAllocate(currentProcess, processPageReq)) {
-                // IF memory allocation fails and not in memory, de-allocate oldest process and allocate current process
-                addProcessToReadyQueue(currentProcess);
-                currentProcess = nullptr;
-                cv.wait(lock); // Wait for a notification that memory might be available
-            }
         }
-        // std::cout << "passed checks" << std::endl;
+        if (currentProcess != nullptr) {
+            //check if process is in memory
+            if (!memoryManager.isProcessinPagingMemory(currentProcess)) {
+                //if not in memory, allocate memory
+                int processPageReq = std::ceil(
+                    static_cast<double>(currentProcess->getProcessSize()) / memoryManager.frameSize);
+                std::lock_guard<std::mutex> lock(allocateMemoryMutex);
+                if (!memoryManager.pagingAllocate(currentProcess, processPageReq)) {
+                    //if memory allocation fails, add process to ready queue and continue
+                    addProcessToReadyQueue(currentProcess);
+                    currentProcess = nullptr;
+                    continue;
+                }
+            }
+            // std::lock_guard<std::mutex> lock(allocateMemoryMutex);
+            // // CASE 1: If the process is not in memory and memory allocation fails because memory is full
+            // int processPageReq = std::ceil(
+            //     static_cast<double>(currentProcess->getProcessSize()) / memoryManager.frameSize);
+            // if (!memoryManager.isProcessinPagingMemory(currentProcess) &&
+            //     !memoryManager.pagingAllocate(currentProcess, processPageReq)) {
+            //     // IF memory allocation fails and not in memory, de-allocate oldest process and allocate current process
+            //     addProcessToReadyQueue(currentProcess);
+            //     currentProcess = nullptr;
+            //
+            //     continue;
+            // }
+        }
         coreVector[cpuIndex].process = currentProcess;
         coreVector[cpuIndex].state = CoreState::RUNNING;
 
@@ -251,9 +264,10 @@ void Scheduler::runPagingRR(int cpuIndex) {
             currentProcess->setRunning(false);
             currentProcess->setDone(true);
             coreVector[cpuIndex].process = nullptr;
-            coreVector[cpuIndex].state = CoreState::IDLE;
-
-            memoryManager.pagingDeallocate(currentProcess);
+            coreVector[cpuIndex].state = CoreState::IDLE; {
+                std::lock_guard<std::mutex> lock(deallocateMemoryMutex);
+                memoryManager.pagingDeallocate(currentProcess);
+            }
 
             finishedProcesses.push_back(currentProcess);
             currentProcess = nullptr;
@@ -288,7 +302,7 @@ void Scheduler::taskManager() {
             // print ready queue
             std::queue<Process *> tempQueue = readyQueue;
             while (!tempQueue.empty()) {
-                std::cout << tempQueue.front()->getProcessName() << std::endl;
+                // std::cout << tempQueue.front()->getProcessName() << std::endl;
                 tempQueue.pop();
             }
             this->memoryManager.visualizeFrames();
@@ -311,10 +325,11 @@ void Scheduler::taskManager() {
             }
             std::cout << "----------------" << std::endl;
             std::cout << "Finished Processes:" << std::endl;
-            for (auto &process: finishedProcesses) {
-                std::cout << process->getProcessName() << " "
-                        << process->getInstructionsDone() << "/"
-                        << process->getInstructionsTotal() << std::endl;
+            int count = 0;
+            for (auto it = finishedProcesses.rbegin(); it != finishedProcesses.rend() && count < 5; ++it, ++count) {
+                std::cout << (*it)->getProcessName() << " "
+                        << (*it)->getInstructionsDone() << "/"
+                        << (*it)->getInstructionsTotal() << std::endl;
             }
             std::cout << "----------------" << std::endl;
         }
