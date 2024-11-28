@@ -13,14 +13,25 @@ class MemoryManager {
 public:
   MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess,
                 int maxMemoryPerProcess, int memPerFrame);
-  int pagingAllocate(Process *process, int processSize, int processPageReq);
-  int pagingDeallocate(Process *process, int processPageAmt);
+
+  bool pagingAllocate(Process *process, int processPageReq);
+
+  Process *getOldestProcessInFrameMap();
+
+  bool pagingDeallocate(Process *process);
+
+
+  bool isProcessinPagingMemory(Process *process);
+
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);
   void generateReport(const std::string &filename);
   std::string getProcessMemoryBlocks();
   double getMemoryUtil();
+
+  void visualizeFrames();
+
   int getMemoryUsage();
 
   void VisualizeMemory();
@@ -33,8 +44,10 @@ public:
   // Paging stuff
 
   struct Frame {
+    Process* processPtr;
     std::string processName;
     int processPage;
+    std::time_t timestamp = 0;
   };
 
   std::vector<int> freeFrameList;

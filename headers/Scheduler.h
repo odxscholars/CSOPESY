@@ -34,6 +34,8 @@ public:
 
   void runRR(int cpuIndex);
 
+  void runPagingRR(int cpuIndex);
+
   void startThreads();
 
   void taskManager();
@@ -49,6 +51,7 @@ public:
   std::vector<Core> *getCoreVector();
 
   int globalExecDelay = 0;
+  Config config;
 
 private:
   std::queue<Process *> readyQueue;
