@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <mutex>
+#include <pstl/glue_algorithm_defs.h>
 #include <vector>
 
 MemoryManager::MemoryManager(int maxMemory, int frameSize,
@@ -21,20 +22,21 @@ MemoryManager::MemoryManager(int maxMemory, int frameSize,
   }
 }
 
-int MemoryManager::pagingAllocate(const std::string &processName,
-                                  int processSize, int processPageReq) {
+int MemoryManager::pagingAllocate(Process *process, int processSize,
+                                  int processPageReq) {
   // take the first one from freeFrameList
   if (freeFrameList.empty()) {
     return -1;
   }
-  // TODO mutate process' pages
 
   for (int i = 1; i < processPageReq; i++) {
     int page = freeFrameList.front();
     freeFrameList.erase(freeFrameList.begin());
 
-    processFrameMap[page].processName = processName;
+    processFrameMap[page].processName = process->getProcessName();
     processFrameMap[page].processPage = page;
+
+    process->pages.push_back(page);
   }
 
   return 1;
@@ -51,10 +53,9 @@ MemoryManager::findProcessInMap(const std::string &processName) {
   return pages;
 }
 
-int MemoryManager::pagingDeallocate(const std::string &processName,
-                                    int processPageAmt) {
+int MemoryManager::pagingDeallocate(Process *process, int processPageAmt) {
 
-  std::vector<int> pages = findProcessInMap(processName);
+  std::vector<int> pages = findProcessInMap(process->getProcessName());
 
   if (pages.empty()) {
     return -1;
@@ -66,8 +67,11 @@ int MemoryManager::pagingDeallocate(const std::string &processName,
     processFrameMap[page].processPage = -1;
 
     freeFrameList.push_back(page);
+    auto newEnd =
+        std::remove(process->pages.begin(), process->pages.end(), page);
+
+    process->pages.erase(newEnd, process->pages.end());
   }
-  // TODO remove process pages
 
   return 1;
 }

@@ -1,6 +1,7 @@
 #ifndef MEMORYMANAGER_H
 #define MEMORYMANAGER_H
 
+#include "Process.h"
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -12,9 +13,8 @@ class MemoryManager {
 public:
   MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess,
                 int maxMemoryPerProcess, int memPerFrame);
-  int pagingAllocate(const std::string &processName, int processSize,
-                     int processPageReq);
-  int pagingDeallocate(const std::string &processName, int processPageAmt);
+  int pagingAllocate(Process *process, int processSize, int processPageReq);
+  int pagingDeallocate(Process *process, int processPageAmt);
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);

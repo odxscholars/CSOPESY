@@ -197,9 +197,9 @@ void Scheduler::startThreads() {
   // Start the thread for generating dummy processes
   generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
   generateThread.detach();
-  std::thread taskManagerThread(&Scheduler::taskManager, this);
+  /*std::thread taskManagerThread(&Scheduler::taskManager, this);*/
   std::thread reportGenerator(&Scheduler::generateReportPerCycle, this);
-  taskManagerThread.detach();
+  /*taskManagerThread.detach();*/
   reportGenerator.detach();
 }
 

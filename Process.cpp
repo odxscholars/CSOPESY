@@ -9,7 +9,12 @@ void Process::setInstructionsDone(int instructions) {
 
 void Process::setCoreAssigned(int core) { coreAssigned = core; }
 
+void Process::setProcessSize(int processSize) {
+  this->processSize = processSize;
+}
+
 void Process::setDone(bool done) { isDone = done; }
+
 void Process::setScreenName(std::string screenName) {
   this->screenName = screenName;
 }
@@ -26,6 +31,8 @@ std::string Process::getProcessName() const { return processName; }
 int Process::getInstructionsDone() const { return instructionsDone; }
 
 int Process::getCoreAssigned() const { return coreAssigned; }
+
+int Process::getProcessSize() const { return processSize; }
 
 bool Process::getDone() const { return isDone; }
 
