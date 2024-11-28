@@ -11,7 +11,10 @@
 class MemoryManager {
 public:
   MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess,
-                int maxMemoryPerProcess);
+                int maxMemoryPerProcess, int memPerFrame);
+  int pagingAllocate(const std::string &processName, int processSize,
+                     int processPageReq);
+  int pagingDeallocate(const std::string &processName, int processPageAmt);
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);
@@ -25,6 +28,7 @@ public:
   int frameSize;
   int minMemoryPerProcess;
   int maxMemoryPerProcess;
+  int memPerFrame;
 
   // Paging stuff
 
@@ -32,6 +36,7 @@ public:
     std::string processName;
     int processPage;
   };
+
   std::vector<int> freeFrameList;
   std::unordered_map<int, Frame> processFrameMap;
 
@@ -45,7 +50,7 @@ private:
   std::vector<MemoryBlock> memoryBlocks;
 
   int findFirstFit(int processSize);
-
+  std::vector<int> findProcessInMap(const std::string &processName);
   int calculateExternalFragmentation();
 };
 

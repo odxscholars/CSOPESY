@@ -3,13 +3,73 @@
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
+#include <iostream>
 #include <mutex>
+#include <vector>
 
 MemoryManager::MemoryManager(int maxMemory, int frameSize,
-                             int minMemoryPerProcess, int maxMemoryPerProcess)
+                             int minMemoryPerProcess, int maxMemoryPerProcess,
+                             int memPerFrame)
     : maxMemory(maxMemory), frameSize(frameSize),
-      minMemoryPerProcess(minMemoryPerProcess) {
+      minMemoryPerProcess(minMemoryPerProcess), memPerFrame(memPerFrame) {
   memoryBlocks.push_back({0, maxMemory - 1, ""}); // Initial free block
+
+  for (int i = 1; i <= memPerFrame; i++) {
+    Frame newFrame = {"", -1};
+    processFrameMap.insert({i, newFrame});
+    freeFrameList.push_back(i);
+  }
+}
+
+int MemoryManager::pagingAllocate(const std::string &processName,
+                                  int processSize, int processPageReq) {
+  // take the first one from freeFrameList
+  if (freeFrameList.empty()) {
+    return -1;
+  }
+  // TODO mutate process' pages
+
+  for (int i = 1; i < processPageReq; i++) {
+    int page = freeFrameList.front();
+    freeFrameList.erase(freeFrameList.begin());
+
+    processFrameMap[page].processName = processName;
+    processFrameMap[page].processPage = page;
+  }
+
+  return 1;
+}
+
+std::vector<int>
+MemoryManager::findProcessInMap(const std::string &processName) {
+  std::vector<int> pages;
+  for (const auto &pair : processFrameMap) {
+    if (pair.second.processName == processName) {
+      pages.push_back(pair.first);
+    }
+  }
+  return pages;
+}
+
+int MemoryManager::pagingDeallocate(const std::string &processName,
+                                    int processPageAmt) {
+
+  std::vector<int> pages = findProcessInMap(processName);
+
+  if (pages.empty()) {
+    return -1;
+  }
+
+  for (const int page : pages) {
+
+    processFrameMap[page].processName = "";
+    processFrameMap[page].processPage = -1;
+
+    freeFrameList.push_back(page);
+  }
+  // TODO remove process pages
+
+  return 1;
 }
 
 bool MemoryManager::allocateMemory(const std::string &processName,

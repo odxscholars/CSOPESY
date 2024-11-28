@@ -12,7 +12,9 @@
 
 Scheduler::Scheduler(Config config, std::vector<Process *> *processVector)
     : memoryManager(config.getMaxOverallMemory(), config.getMemoryPerFrame(),
-                    config.getMinMemoryPerProcess(), config.getMaxMemoryPerProcess()) {
+                    config.getMinMemoryPerProcess(),
+                    config.getMaxMemoryPerProcess(),
+                    config.getMemoryPerFrame()) {
   numCores = config.getNumCpu();
   schedulingAlgorithm = config.getScheduler();
   quantumCycles = config.getQuantumCycles();
