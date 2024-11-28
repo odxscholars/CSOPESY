@@ -113,6 +113,7 @@ void Scheduler::runFCFSScheduler(int cpuIndex) {
     finishedProcesses.push_back(currentProcess);
   }
 }
+
 void Scheduler::runRR(int cpuIndex) {
   Process *currentProcess = nullptr;
   while (threadsContinue) {
