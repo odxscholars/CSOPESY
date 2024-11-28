@@ -82,3 +82,6 @@ int Config::getMaxOverallMemory() const { return maxOverallMemory; }
 int Config::getMemoryPerFrame() const { return memoryPerFrame; }
 
 int Config::getMemoryPerProcess() const { return memoryPerProcess; }
+
+int Config::getMinMemoryPerProcess() const { return minMemoryPerProcess; }
+int Config::getMaxMemoryPerProcess() const { return maxMemoryPerProcess; }

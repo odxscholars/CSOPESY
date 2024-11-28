@@ -21,6 +21,8 @@ public:
   int getMaxOverallMemory() const;
   int getMemoryPerFrame() const;
   int getMemoryPerProcess() const;
+  int getMinMemoryPerProcess() const;
+  int getMaxMemoryPerProcess() const;
 
 private:
   std::string filename;
@@ -34,6 +36,8 @@ private:
   int maxOverallMemory;
   int memoryPerFrame;
   int memoryPerProcess;
+  int minMemoryPerProcess;
+  int maxMemoryPerProcess;
 
   void parseLine(const std::string &line);
 };

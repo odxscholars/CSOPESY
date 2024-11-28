@@ -9,7 +9,8 @@
 
 class MemoryManager {
 public:
-  MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess, int maxMemoryPerProcess);
+  MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess,
+                int maxMemoryPerProcess);
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);

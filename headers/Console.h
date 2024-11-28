@@ -19,6 +19,7 @@ public:
   void displayMainMenu();
   void processSMI(Process &process);
   void processCommand(const std::string &command, bool &session);
+
   std::string generateReport();
   std::vector<Process *> *processVector = new std::vector<Process *>;
   std::vector<Core> *coreVector;

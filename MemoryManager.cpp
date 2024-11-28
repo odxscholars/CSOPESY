@@ -5,7 +5,8 @@
 #include <iomanip>
 #include <mutex>
 
-MemoryManager::MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess, int maxMemoryPerProcess)
+MemoryManager::MemoryManager(int maxMemory, int frameSize,
+                             int minMemoryPerProcess, int maxMemoryPerProcess)
     : maxMemory(maxMemory), frameSize(frameSize),
       minMemoryPerProcess(minMemoryPerProcess) {
   memoryBlocks.push_back({0, maxMemory - 1, ""}); // Initial free block
@@ -61,9 +62,9 @@ void MemoryManager::generateReport(const std::string &filename) {
   std::string folderPath =
       "./memory_stamps"; // Relative path, or use "/memory_stamps" for absolute
                          // path
-  // if (!std::filesystem::exists(folderPath)) {
-  //   std::filesystem::create_directory(folderPath);
-  // }
+  if (!std::filesystem::exists(folderPath)) {
+    std::filesystem::create_directory(folderPath);
+  }
 
   std::string filePath = folderPath + "/" + filename;
   std::ofstream reportFile(filePath);
