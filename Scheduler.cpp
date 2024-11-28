@@ -137,6 +137,7 @@ void Scheduler::runRR(int cpuIndex) {
 
     {
       std::lock_guard<std::mutex> lock(memoryManagerMutex);
+      //TODO: I think `memoryManager.minMemoryPerProcess` is not correct. Should be referring to Process memorySize
       if (!memoryManager.isProcessInMemory(currentProcess->getProcessName()) &&
           !memoryManager.allocateMemory(currentProcess->getProcessName(),
                                         memoryManager.minMemoryPerProcess)) {
