@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class MemoryManager {
@@ -33,7 +34,7 @@ public:
     int processPage;
   };
   std::vector<int> freeFrameLis;
-  std::unordered_map <int, Frame> processFrameMap;
+  std::unordered_map<int, Frame> processFrameMap;
 
 private:
   struct MemoryBlock {
