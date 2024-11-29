@@ -140,18 +140,18 @@ bool MemoryManager::pagingDeallocate(Process *process) {
 }
 
 void MemoryManager::writeBackingStore(Process *process) {
+  std::cout << "IM GETTING TRIGGERED!";
   std::string fileName = "backing_store.txt";
-
   std::ofstream file;
 
-  file.open(fileName);
+  file.open(fileName, std::ios::out);
 
   if (!file) {
     std::cerr << "Could not open file!";
   }
 
   file << "\n";
-  file << process->getProcessName();
+  file << process->getProcessName() << "\t";
   file << process->getInstructionsDone();
 
   file.close();

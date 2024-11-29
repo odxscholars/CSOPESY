@@ -185,7 +185,6 @@ void Scheduler::runRR(int cpuIndex) {
       coreVector[cpuIndex].process = nullptr;
       coreVector[cpuIndex].state = CoreState::IDLE;
       memoryManager.deallocateMemory(currentProcess->getProcessName());
-      memoryManager.writeBackingStore(currentProcess);
       finishedProcesses.push_back(currentProcess);
       currentProcess = nullptr;
     } else {
@@ -231,6 +230,11 @@ void Scheduler::runPagingRR(int cpuIndex) {
         if (!memoryManager.pagingAllocate(currentProcess, processPageReq)) {
           // if memory allocation fails, add process to ready queue and continue
           addProcessToReadyQueue(currentProcess);
+          /*{*/
+          /*  std::lock_guard<std::mutex> lock(deallocateMemoryMutex);*/
+          /*  memoryManager.pagingDeallocate(currentProcess);*/
+          /*  memoryManager.writeBackingStore(currentProcess);*/
+          /*}*/
           currentProcess = nullptr;
           continue;
         }
@@ -280,8 +284,8 @@ void Scheduler::runPagingRR(int cpuIndex) {
       {
         std::lock_guard<std::mutex> lock(deallocateMemoryMutex);
         memoryManager.pagingDeallocate(currentProcess);
+        memoryManager.writeBackingStore(currentProcess);
       }
-
       finishedProcesses.push_back(currentProcess);
       currentProcess = nullptr;
     } else {
