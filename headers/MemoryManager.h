@@ -20,7 +20,6 @@ public:
 
   bool pagingDeallocate(Process *process);
 
-
   bool isProcessinPagingMemory(Process *process);
 
   bool allocateMemory(const std::string &processName, int processSize);
@@ -28,11 +27,11 @@ public:
   bool isProcessInMemory(const std::string &processName);
   void generateReport(const std::string &filename);
   std::string getProcessMemoryBlocks();
-  double getMemoryUtil();
+  int getMemoryUsage(const std::string &memoryType);
+  double getMemoryUtil(const std::string &memoryType);
+  int getFreeMemory(const std::string &memoryType);
 
   void visualizeFrames();
-
-  int getMemoryUsage();
 
   void VisualizeMemory();
   int maxMemory;
@@ -40,11 +39,13 @@ public:
   int minMemoryPerProcess;
   int maxMemoryPerProcess;
   int memPerFrame;
+  int pagedIns = 0;
+  int pagedOuts = 0;
 
   // Paging stuff
 
   struct Frame {
-    Process* processPtr;
+    Process *processPtr;
     std::string processName;
     int processPage;
     std::time_t timestamp = 0;

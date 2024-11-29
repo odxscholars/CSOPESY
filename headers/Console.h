@@ -30,6 +30,7 @@ private:
   std::vector<std::string> existingSessions;
   int maxins, minins, coreCount;
   std::string sessionName;
+  int maxOverallMem, memPerFrame;
 };
 
 #endif // CONSOLE_H

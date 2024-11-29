@@ -178,6 +178,8 @@ void Console::processCommand(const std::string &command, bool &session) {
                                       // to the processVector in Console
     maxins = loadedConfig.getMaxIns();
     minins = loadedConfig.getMinIns();
+    maxOverallMem = loadedConfig.getMaxOverallMemory();
+    memPerFrame = loadedConfig.getMemoryPerFrame();
     coreCount = loadedConfig.getNumCpu();
     loadedConfig.displayConfig();
     isInitialized = true;
@@ -278,7 +280,7 @@ void Console::processCommand(const std::string &command, bool &session) {
     } else {
       std::cout << "Something went wrong while opening the file!!" << std::endl;
     }
-    
+
   } else if (command == "clear") {
     clearScreen();
     displayMainMenu();
@@ -287,6 +289,13 @@ void Console::processCommand(const std::string &command, bool &session) {
 
     exit(0);
   } else if (command == "process-smi") {
+    std::string type;
+
+    if (maxOverallMem == memPerFrame) {
+      type = "flat";
+    } else {
+      type = "paging";
+    }
 
     int cpuUtil = 0;
     int coreUsed = 0;
@@ -309,13 +318,31 @@ void Console::processCommand(const std::string &command, bool &session) {
         << "------------------------------------------------------------\n";
     std::cout << "CPU-Util: " << cpuUtil << "%\n";
     std::cout << "Memory Usage: "
-              << scheduler->getMemoryManager().getMemoryUsage() << "MiB/"
+              << scheduler->getMemoryManager().getMemoryUsage(type) << "MiB/"
               << scheduler->getMemoryManager().maxMemory << "MiB\n";
     std::cout << "Memory Util\n";
     std::cout
         << "============================================================\n";
-    std::cout << "Running Processes and Memory Usage: \n"
-              << scheduler->getMemoryManager().getProcessMemoryBlocks();
+    /*std::cout << "Running Processes and Memory Usage: \n"*/
+    /*          << scheduler->getMemoryManager().getProcessMemoryBlocks();*/
+  } else if (command == "vmstat") {
+    std::string type;
+    if (maxOverallMem == memPerFrame) {
+      type = "flat";
+    } else {
+      type = "paging";
+    }
+    std::cout << maxOverallMem << "K TOTAL MEMORY\n";
+    std::cout << scheduler->getMemoryManager().getMemoryUsage(type)
+              << "K USED MEMORY\n";
+    std::cout << scheduler->getMemoryManager().getFreeMemory(type)
+              << "K FREE MEMORY\n";
+    std::cout << scheduler->idleTicks << " Idle CPU ticks\n";
+    std::cout << scheduler->activeTicks << " Active CPU ticks\n";
+    std::cout << scheduler->idleTicks + scheduler->activeTicks
+              << " Total ticks\n";
+    std::cout << scheduler->getMemoryManager().pagedIns << " Num paged in\n";
+    std::cout << scheduler->getMemoryManager().pagedOuts << " Num paged out\n";
   } else {
     std::cout << "Unknown command. Try again.\n";
   }

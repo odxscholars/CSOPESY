@@ -53,6 +53,9 @@ public:
   int globalExecDelay = 0;
   Config config;
   std::condition_variable memoryCv;
+  int totalTicks = 0;
+  int idleTicks = 0;
+  int activeTicks = 0;
 
 private:
   std::queue<Process *> readyQueue;
