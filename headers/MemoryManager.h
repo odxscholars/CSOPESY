@@ -1,6 +1,7 @@
 #ifndef MEMORYMANAGER_H
 #define MEMORYMANAGER_H
 
+#include "Process.h"
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -11,13 +12,26 @@
 class MemoryManager {
 public:
   MemoryManager(int maxMemory, int frameSize, int minMemoryPerProcess,
-                int maxMemoryPerProcess);
+                int maxMemoryPerProcess, int memPerFrame);
+
+  bool pagingAllocate(Process *process, int processPageReq);
+
+  Process *getOldestProcessInFrameMap();
+
+  bool pagingDeallocate(Process *process);
+
+
+  bool isProcessinPagingMemory(Process *process);
+
   bool allocateMemory(const std::string &processName, int processSize);
   void deallocateMemory(const std::string &processName);
   bool isProcessInMemory(const std::string &processName);
   void generateReport(const std::string &filename);
   std::string getProcessMemoryBlocks();
   double getMemoryUtil();
+
+  void visualizeFrames();
+
   int getMemoryUsage();
 
   void VisualizeMemory();
@@ -25,13 +39,17 @@ public:
   int frameSize;
   int minMemoryPerProcess;
   int maxMemoryPerProcess;
+  int memPerFrame;
 
   // Paging stuff
 
   struct Frame {
+    Process* processPtr;
     std::string processName;
     int processPage;
+    std::time_t timestamp = 0;
   };
+
   std::vector<int> freeFrameList;
   std::unordered_map<int, Frame> processFrameMap;
 
@@ -45,7 +63,7 @@ private:
   std::vector<MemoryBlock> memoryBlocks;
 
   int findFirstFit(int processSize);
-
+  std::vector<int> findProcessInMap(const std::string &processName);
   int calculateExternalFragmentation();
 };
 

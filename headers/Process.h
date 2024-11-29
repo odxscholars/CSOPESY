@@ -5,6 +5,7 @@
 // TODO: [Screen -s] When process is finished and user exits, delete the process
 #include <iostream>
 #include <set>
+#include <vector>
 #ifndef PROCESS_H
 #define PROCESS_H
 #include <ctime>
@@ -18,12 +19,14 @@ public:
   void setRunning(bool running);
   void setWaiting(bool waiting);
   void setScreenName(std::string screenName);
+  void setProcessSize(int processSize);
 
   void setInstructionsTotal(int instructions); // only called once
   // getters
   std::string getProcessName() const;
   int getInstructionsDone() const;
   int getCoreAssigned() const;
+  int getProcessSize() const;
 
   bool getDone() const;
   bool getRunning() const;
@@ -36,11 +39,12 @@ public:
   std::time_t endTime = 0;
 
   // paging stuff
-  std::set<int> pages; // pages that the process is using
+  std::vector<int> pages; // pages that the process is using
 
 private:
   std::string processName;
   std::string screenName;
+  int processSize;
   int coreAssigned = -1;
 
   // BOOLEAN FLAGS
