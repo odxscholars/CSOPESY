@@ -292,35 +292,22 @@ std::string MemoryManager::getProcessMemoryBlocks() {
 }
 
 int MemoryManager::getMemoryUsage(const std::string &memoryType) {
-  /*std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;*/
   int totalMemory = 0;
-  /*std::cout << "\n MemPerFrame " << memPerFrame << "\n";*/
-  /*if (memoryType == "flat") {*/
-  /*  for (const auto &block : memoryBlocks) {*/
-  /*    if (!block.processName.empty()) {*/
-  /*      totalMemory += block.end - block.start;*/
-  /*    }*/
-  /*  }*/
-  /*} else {*/
 
-  /*std::for_each(tempProcessFrameMap.begin(), tempProcessFrameMap.end(),*/
-  /*              [&totalMemory, this](const std::pair<const int, Frame> &pair)
-   * {*/
-  /*                int key = pair.first;*/
-  /*                Frame frame = pair.second;*/
-  /*                // Use 'key' and 'frame' as needed*/
-  /*                if (!(frame.processName == "")) {*/
-  /*                  totalMemory += memPerFrame;*/
-  /*                }*/
-  /*              });*/
+  if (memoryType == "flat") {
+    for (const auto &block : memoryBlocks) {
+      if (!block.processName.empty()) {
+        totalMemory += block.end - block.start + 1;
+      }
+    }
+  } else {
+    for (const auto &frame : processFrameMap) {
+      if (frame.second.processPtr != nullptr) {
+        totalMemory += memPerFrame;
+      }
+    }
+  }
 
-  /*for (const auto &frame : tempProcessFrameMap) {*/
-  /*if (!(frame.second.processName == "")) {*/
-  /*    totalMemory += memPerFrame;*/
-  /*    std::cout << totalMemory << "\n";*/
-  /*  }*/
-  /*}*/
-  /*}*/
   return totalMemory;
 }
 

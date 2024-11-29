@@ -319,10 +319,10 @@ void Console::processCommand(const std::string &command, bool &session) {
     std::cout
         << "------------------------------------------------------------\n";
     std::cout << "CPU-Util: " << cpuUtil << "%\n";
-    /*std::cout << "Memory Usage: "*/
-    /*          << scheduler->getMemoryManager().getMemoryUsage(type) <<
-     * "MiB/"*/
-    /*          << scheduler->getMemoryManager().maxMemory << "MiB\n";*/
+    std::cout << "Memory Usage: "
+              << scheduler->getMemoryManager().getMemoryUsage(type) <<
+     * "MiB/"
+             << scheduler->getMemoryManager().maxMemory << "MiB\n";
     /*std::cout << "Memory Util: "*/
     /*          << scheduler->getMemoryManager().getMemoryUtil(type) << "%\n";*/
     /*std::cout*/
