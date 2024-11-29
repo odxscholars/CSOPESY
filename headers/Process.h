@@ -40,6 +40,7 @@ public:
 
   // paging stuff
   std::vector<int> pages; // pages that the process is using
+    bool isRunning = false;
 
 private:
   std::string processName;
@@ -49,7 +50,7 @@ private:
 
   // BOOLEAN FLAGS
   bool isDone = false;    // when not waiting to be done by scheduler
-  bool isRunning = false; // when running on a core
+   // when running on a core
   bool isWaiting = false; // in ready queue
                           // in main memory for scheduling
 
