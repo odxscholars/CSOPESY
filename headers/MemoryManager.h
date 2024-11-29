@@ -34,6 +34,8 @@ public:
 
   void visualizeFrames();
 
+  int getFramesOccupiedByProcess(const std::string &processName);
+
   void VisualizeMemory();
 
   void writeBackingStore(Process *process);

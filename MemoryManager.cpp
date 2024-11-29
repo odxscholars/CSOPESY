@@ -95,7 +95,7 @@ Process *MemoryManager::getOldestProcessInFrameMap() {
   Process *oldestProcess = nullptr;
   // traverse through the processFrameMap to find the oldest process
   for (const auto &pair : processFrameMap) {
-    if (pair.second.timestamp < oldestTimestamp) {
+    if (pair.second.timestamp < oldestTimestamp && !pair.second.processPtr->isRunning) {
       oldestTimestamp = pair.second.timestamp;
       oldestProcess = pair.second.processPtr;
     }
@@ -411,4 +411,16 @@ void MemoryManager::visualizeFrames() {
   std::cout << "+---------+----------------+----------------+------------------"
                "---+--------------+"
             << std::endl;
+
+
+}
+
+int MemoryManager::getFramesOccupiedByProcess(const std::string &processName) {
+  int framesOccupied = 0;
+  for (const auto &frame : processFrameMap) {
+    if (frame.second.processName == processName) {
+      framesOccupied++;
+    }
+  }
+  return framesOccupied;
 }
