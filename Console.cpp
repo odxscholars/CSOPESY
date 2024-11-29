@@ -289,6 +289,8 @@ void Console::processCommand(const std::string &command, bool &session) {
 
     exit(0);
   } else if (command == "process-smi") {
+    /*std::unordered_map<int, MemoryManager::Frame> tempProcessFrameMap =*/
+    /*    scheduler->getMemoryManager().processFrameMap;*/
     std::string type;
 
     if (maxOverallMem == memPerFrame) {
@@ -317,12 +319,14 @@ void Console::processCommand(const std::string &command, bool &session) {
     std::cout
         << "------------------------------------------------------------\n";
     std::cout << "CPU-Util: " << cpuUtil << "%\n";
-    std::cout << "Memory Usage: "
-              << scheduler->getMemoryManager().getMemoryUsage(type) << "MiB/"
-              << scheduler->getMemoryManager().maxMemory << "MiB\n";
-    std::cout << "Memory Util\n";
-    std::cout
-        << "============================================================\n";
+    /*std::cout << "Memory Usage: "*/
+    /*          << scheduler->getMemoryManager().getMemoryUsage(type) <<
+     * "MiB/"*/
+    /*          << scheduler->getMemoryManager().maxMemory << "MiB\n";*/
+    /*std::cout << "Memory Util: "*/
+    /*          << scheduler->getMemoryManager().getMemoryUtil(type) << "%\n";*/
+    /*std::cout*/
+    /*    << "============================================================\n";*/
     /*std::cout << "Running Processes and Memory Usage: \n"*/
     /*          << scheduler->getMemoryManager().getProcessMemoryBlocks();*/
   } else if (command == "vmstat") {

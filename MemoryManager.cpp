@@ -7,6 +7,7 @@
 #include <mutex>
 #include <pstl/glue_algorithm_defs.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 MemoryManager::MemoryManager(int maxMemory, int frameSize,
@@ -34,6 +35,7 @@ MemoryManager::MemoryManager(int maxMemory, int frameSize,
 bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
   // get unix timestamp
   std::time_t timestamp = std::time(nullptr);
+  int processSize = process->getProcessSize();
 
   // std::cout << "Allocating " << processPageReq << " pages for process "
   //           << process->getProcessName() << std::endl;
@@ -41,10 +43,12 @@ bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
   if (freeFrameList.empty()) {
     return false;
   }
+
   if (processPageReq == 1) {
     int page = freeFrameList.front();
     freeFrameList.erase(freeFrameList.begin());
 
+    processFrameMap[page].processSizeInMem = processSize;
     processFrameMap[page].processName = process->getProcessName();
     processFrameMap[page].processPage = page;
     processFrameMap[page].timestamp = timestamp;
@@ -59,6 +63,7 @@ bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
   }
 
   for (int i = 1; i <= processPageReq; i++) {
+    int currSize = processSize - memPerFrame;
     int page = freeFrameList.front();
     freeFrameList.erase(freeFrameList.begin());
 
@@ -66,9 +71,14 @@ bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
     processFrameMap[page].processPage = page;
     processFrameMap[page].timestamp = timestamp;
     processFrameMap[page].processPtr = process;
+    if (currSize < 0) {
+      processFrameMap[page].processSizeInMem = processSize;
+    } else {
+      processFrameMap[page].processSizeInMem = currSize;
+    }
 
-    /*std::cout << "Allocated page " << page << " for process "*/
-    /*          << process->getProcessName() << std::endl;*/
+    /*std::cout << "Mem size for: " << processFrameMap[page].processSizeInMem*/
+    /*          << " for process " << process->getProcessName() << std::endl;*/
 
     process->pages.push_back(page);
     pagedIns += 1;
@@ -272,49 +282,65 @@ int MemoryManager::calculateExternalFragmentation() {
 
 std::string MemoryManager::getProcessMemoryBlocks() {
   std::ostringstream report;
-  for (const auto &block : memoryBlocks) {
-    if (!block.processName.empty()) {
-      report << block.processName << " " << block.end - block.start << "MiB\n";
+  for (const auto &frame : processFrameMap) {
+    if (!(frame.second.processPtr == nullptr)) {
+      report << frame.second.processName << " " << frame.second.processSizeInMem
+             << "Mib\n";
     }
   }
   return report.str();
 }
 
 int MemoryManager::getMemoryUsage(const std::string &memoryType) {
+  /*std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;*/
+  int totalMemory = 0;
+  /*std::cout << "\n MemPerFrame " << memPerFrame << "\n";*/
+  /*if (memoryType == "flat") {*/
+  /*  for (const auto &block : memoryBlocks) {*/
+  /*    if (!block.processName.empty()) {*/
+  /*      totalMemory += block.end - block.start;*/
+  /*    }*/
+  /*  }*/
+  /*} else {*/
 
-  int totalMemory;
-  if (memoryType == "flat") {
-    for (const auto &block : memoryBlocks) {
-      if (!block.processName.empty()) {
-        totalMemory += block.end - block.start;
-      }
-    }
-  } else {
-    for (const auto &frame : processFrameMap) {
-      if (!(frame.second.processPtr == nullptr)) {
-        totalMemory += memPerFrame;
-      }
-    }
-  }
+  /*std::for_each(tempProcessFrameMap.begin(), tempProcessFrameMap.end(),*/
+  /*              [&totalMemory, this](const std::pair<const int, Frame> &pair)
+   * {*/
+  /*                int key = pair.first;*/
+  /*                Frame frame = pair.second;*/
+  /*                // Use 'key' and 'frame' as needed*/
+  /*                if (!(frame.processName == "")) {*/
+  /*                  totalMemory += memPerFrame;*/
+  /*                }*/
+  /*              });*/
+
+  /*for (const auto &frame : tempProcessFrameMap) {*/
+  /*if (!(frame.second.processName == "")) {*/
+  /*    totalMemory += memPerFrame;*/
+  /*    std::cout << totalMemory << "\n";*/
+  /*  }*/
+  /*}*/
+  /*}*/
   return totalMemory;
 }
 
 double MemoryManager::getMemoryUtil(const std::string &memoryType) {
+  std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;
   double totalMemoryUtil;
-  int totalMemory;
+  int totalMemory = 0;
 
-  if (memoryType == "flat") {
-    for (const auto &block : memoryBlocks) {
-      if (!block.processName.empty()) {
-        totalMemory += frameSize;
-      }
+  /*if (memoryType == "flat") {*/
+  /*  for (const auto &block : memoryBlocks) {*/
+  /*    if (!block.processName.empty()) {*/
+  /*      totalMemory += frameSize;*/
+  /*    }*/
+  /*  }*/
+  /*} else {*/
+  for (const auto &frame : tempProcessFrameMap) {
+    if (!(frame.second.processPtr == nullptr)) {
+      totalMemory += frameSize;
     }
-  } else {
-    for (const auto &frame : processFrameMap) {
-      if (!(frame.second.processPtr == nullptr)) {
-        totalMemory += frameSize;
-      }
-    }
+    /*}*/
   }
 
   totalMemoryUtil = (static_cast<double>(totalMemory) / maxMemory) * 100;
@@ -323,19 +349,20 @@ double MemoryManager::getMemoryUtil(const std::string &memoryType) {
 
 int MemoryManager::getFreeMemory(const std::string &memoryType) {
   int freeMemory = 0;
+  std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;
 
-  if (memoryType == "flat") {
-    for (const auto &block : memoryBlocks) {
-      if (block.processName.empty()) {
-        freeMemory += frameSize;
-      }
+  /*if (memoryType == "flat") {*/
+  /*  for (const auto &block : memoryBlocks) {*/
+  /*    if (block.processName.empty()) {*/
+  /*      freeMemory += frameSize;*/
+  /*    }*/
+  /*  }*/
+  /*} else {*/
+  for (const auto &frame : tempProcessFrameMap) {
+    if (frame.second.processPtr == nullptr) {
+      freeMemory += frameSize;
     }
-  } else {
-    for (const auto &frame : processFrameMap) {
-      if (frame.second.processPtr == nullptr) {
-        freeMemory += frameSize;
-      }
-    }
+    /*}*/
   }
 
   return freeMemory;
@@ -365,7 +392,7 @@ void MemoryManager::visualizeFrames() {
               << " | " << std::setw(12)
               << (frame.processPtr == nullptr
                       ? "N/A"
-                      : std::to_string(frame.processPtr->getProcessSize()))
+                      : std::to_string(frame.processSizeInMem))
               << " |" << std::endl;
   }
 

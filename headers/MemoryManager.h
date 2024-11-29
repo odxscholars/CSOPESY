@@ -49,6 +49,7 @@ public:
     std::string processName;
     int processPage;
     std::time_t timestamp = 0;
+    int processSizeInMem = 0;
   };
 
   std::vector<int> freeFrameList;

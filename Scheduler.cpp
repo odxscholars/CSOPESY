@@ -335,16 +335,16 @@ void Scheduler::taskManager() {
           std::cout << "CPU " << i << " Idle" << std::endl;
         }
       }
-      std::cout << "----------------" << std::endl;
-      std::cout << "Finished Processes:" << std::endl;
-      int count = 0;
-      for (auto it = finishedProcesses.rbegin();
-           it != finishedProcesses.rend() && count < 5; ++it, ++count) {
-        std::cout << (*it)->getProcessName() << " "
-                  << (*it)->getInstructionsDone() << "/"
-                  << (*it)->getInstructionsTotal() << std::endl;
-      }
-      std::cout << "----------------" << std::endl;
+      /*std::cout << "----------------" << std::endl;*/
+      /*std::cout << "Finished Processes:" << std::endl;*/
+      /*int count = 0;*/
+      /*for (auto it = finishedProcesses.rbegin();*/
+      /*     it != finishedProcesses.rend() && count < 5; ++it, ++count) {*/
+      /*  std::cout << (*it)->getProcessName() << " "*/
+      /*            << (*it)->getInstructionsDone() << "/"*/
+      /*            << (*it)->getInstructionsTotal() << std::endl;*/
+      /*}*/
+      /*std::cout << "----------------" << std::endl;*/
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(globalExecDelay));
   }
