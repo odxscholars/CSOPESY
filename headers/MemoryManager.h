@@ -5,6 +5,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -63,6 +64,7 @@ private:
   };
 
   std::vector<MemoryBlock> memoryBlocks;
+  std::mutex frameMutex;
 
   int findFirstFit(int processSize);
   std::vector<int> findProcessInMap(const std::string &processName);

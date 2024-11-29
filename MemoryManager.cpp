@@ -34,6 +34,7 @@ MemoryManager::MemoryManager(int maxMemory, int frameSize,
  */
 bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
   // get unix timestamp
+  std::lock_guard<std::mutex> lock(frameMutex);
   std::time_t timestamp = std::time(nullptr);
   int processSize = process->getProcessSize();
 
@@ -88,6 +89,7 @@ bool MemoryManager::pagingAllocate(Process *process, int processPageReq) {
 }
 
 Process *MemoryManager::getOldestProcessInFrameMap() {
+  std::lock_guard<std::mutex> lock(frameMutex);
   std::time_t oldestTimestamp = std::time(nullptr);
   Process *oldestProcess = nullptr;
   // traverse through the processFrameMap to find the oldest process
@@ -102,6 +104,7 @@ Process *MemoryManager::getOldestProcessInFrameMap() {
 
 std::vector<int>
 MemoryManager::findProcessInMap(const std::string &processName) {
+  std::lock_guard<std::mutex> lock(frameMutex);
   std::vector<int> pages;
   for (const auto &pair : processFrameMap) {
     if (pair.second.processName == processName) {
@@ -292,6 +295,7 @@ std::string MemoryManager::getProcessMemoryBlocks() {
 }
 
 int MemoryManager::getMemoryUsage(const std::string &memoryType) {
+  std::lock_guard<std::mutex> lock(frameMutex);
   int totalMemory = 0;
 
   if (memoryType == "flat") {
@@ -312,22 +316,23 @@ int MemoryManager::getMemoryUsage(const std::string &memoryType) {
 }
 
 double MemoryManager::getMemoryUtil(const std::string &memoryType) {
+  std::lock_guard<std::mutex> lock(frameMutex);
   std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;
   double totalMemoryUtil;
   int totalMemory = 0;
 
-  /*if (memoryType == "flat") {*/
-  /*  for (const auto &block : memoryBlocks) {*/
-  /*    if (!block.processName.empty()) {*/
-  /*      totalMemory += frameSize;*/
-  /*    }*/
-  /*  }*/
-  /*} else {*/
-  for (const auto &frame : tempProcessFrameMap) {
-    if (!(frame.second.processPtr == nullptr)) {
-      totalMemory += frameSize;
+  if (memoryType == "flat") {
+    for (const auto &block : memoryBlocks) {
+      if (!block.processName.empty()) {
+        totalMemory += frameSize;
+      }
     }
-    /*}*/
+  } else {
+    for (const auto &frame : tempProcessFrameMap) {
+      if (!(frame.second.processPtr == nullptr)) {
+        totalMemory += frameSize;
+      }
+    }
   }
 
   totalMemoryUtil = (static_cast<double>(totalMemory) / maxMemory) * 100;
@@ -335,21 +340,22 @@ double MemoryManager::getMemoryUtil(const std::string &memoryType) {
 }
 
 int MemoryManager::getFreeMemory(const std::string &memoryType) {
+  std::lock_guard<std::mutex> lock(frameMutex);
   int freeMemory = 0;
   std::unordered_map<int, Frame> tempProcessFrameMap = processFrameMap;
 
-  /*if (memoryType == "flat") {*/
-  /*  for (const auto &block : memoryBlocks) {*/
-  /*    if (block.processName.empty()) {*/
-  /*      freeMemory += frameSize;*/
-  /*    }*/
-  /*  }*/
-  /*} else {*/
-  for (const auto &frame : tempProcessFrameMap) {
-    if (frame.second.processPtr == nullptr) {
-      freeMemory += frameSize;
+  if (memoryType == "flat") {
+    for (const auto &block : memoryBlocks) {
+      if (block.processName.empty()) {
+        freeMemory += frameSize;
+      }
     }
-    /*}*/
+  } else {
+    for (const auto &frame : tempProcessFrameMap) {
+      if (frame.second.processPtr == nullptr) {
+        freeMemory += frameSize;
+      }
+    }
   }
 
   return freeMemory;

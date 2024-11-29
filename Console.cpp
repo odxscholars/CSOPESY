@@ -320,15 +320,14 @@ void Console::processCommand(const std::string &command, bool &session) {
         << "------------------------------------------------------------\n";
     std::cout << "CPU-Util: " << cpuUtil << "%\n";
     std::cout << "Memory Usage: "
-              << scheduler->getMemoryManager().getMemoryUsage(type) <<
-     * "MiB/"
-             << scheduler->getMemoryManager().maxMemory << "MiB\n";
-    /*std::cout << "Memory Util: "*/
-    /*          << scheduler->getMemoryManager().getMemoryUtil(type) << "%\n";*/
-    /*std::cout*/
-    /*    << "============================================================\n";*/
-    /*std::cout << "Running Processes and Memory Usage: \n"*/
-    /*          << scheduler->getMemoryManager().getProcessMemoryBlocks();*/
+              << scheduler->getMemoryManager()->getMemoryUsage(type) << *"MiB/"
+              << scheduler->getMemoryManager()->maxMemory << "MiB\n";
+    std::cout << "Memory Util: "
+              << scheduler->getMemoryManager()->getMemoryUtil(type) << "%\n";
+    std::cout
+        << "============================================================\n";
+    std::cout << "Running Processes and Memory Usage: \n"
+              << scheduler->getMemoryManager()->getProcessMemoryBlocks();
   } else if (command == "vmstat") {
     std::string type;
     if (maxOverallMem == memPerFrame) {
@@ -337,16 +336,16 @@ void Console::processCommand(const std::string &command, bool &session) {
       type = "paging";
     }
     std::cout << maxOverallMem << "K TOTAL MEMORY\n";
-    std::cout << scheduler->getMemoryManager().getMemoryUsage(type)
+    std::cout << scheduler->getMemoryManager()->getMemoryUsage(type)
               << "K USED MEMORY\n";
-    std::cout << scheduler->getMemoryManager().getFreeMemory(type)
+    std::cout << scheduler->getMemoryManager()->getFreeMemory(type)
               << "K FREE MEMORY\n";
     std::cout << scheduler->idleTicks << " Idle CPU ticks\n";
     std::cout << scheduler->activeTicks << " Active CPU ticks\n";
     std::cout << scheduler->idleTicks + scheduler->activeTicks
               << " Total ticks\n";
-    std::cout << scheduler->getMemoryManager().pagedIns << " Num paged in\n";
-    std::cout << scheduler->getMemoryManager().pagedOuts << " Num paged out\n";
+    std::cout << scheduler->getMemoryManager()->pagedIns << " Num paged in\n";
+    std::cout << scheduler->getMemoryManager()->pagedOuts << " Num paged out\n";
   } else {
     std::cout << "Unknown command. Try again.\n";
   }

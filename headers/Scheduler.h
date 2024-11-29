@@ -46,7 +46,7 @@ public:
 
   void generateReportPerCycle();
 
-  MemoryManager getMemoryManager();
+  MemoryManager *getMemoryManager();
 
   std::vector<Core> *getCoreVector();
 

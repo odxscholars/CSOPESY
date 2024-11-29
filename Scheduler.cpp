@@ -401,4 +401,4 @@ void Scheduler::startSchedulerTest() {
   startThreads();
 }
 
-MemoryManager Scheduler::getMemoryManager() { return memoryManager; }
+MemoryManager *Scheduler::getMemoryManager() { return &memoryManager; }
