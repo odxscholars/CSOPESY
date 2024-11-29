@@ -232,8 +232,7 @@ void Scheduler::runPagingRR(int cpuIndex) {
           addProcessToReadyQueue(currentProcess);
           /*{*/
           /*  std::lock_guard<std::mutex> lock(deallocateMemoryMutex);*/
-          /*  memoryManager.pagingDeallocate(currentProcess);*/
-          /*  memoryManager.writeBackingStore(currentProcess);*/
+          memoryManager.writeBackingStore(currentProcess);
           /*}*/
           currentProcess = nullptr;
           continue;
@@ -306,9 +305,9 @@ void Scheduler::startThreads() {
   // Start the thread for generating dummy processes
   generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
   generateThread.detach();
-  std::thread taskManagerThread(&Scheduler::taskManager, this);
+  /*std::thread taskManagerThread(&Scheduler::taskManager, this);*/
   std::thread reportGenerator(&Scheduler::generateReportPerCycle, this);
-  taskManagerThread.detach();
+  /*taskManagerThread.detach();*/
   reportGenerator.detach();
 }
 
@@ -368,7 +367,6 @@ void Scheduler::bootStrapthreads() {
       if (config.getMaxOverallMemory() == config.getMemoryPerFrame()) {
         coreVector[i].thread = new std::thread(&Scheduler::runRR, this, i);
       } else {
-        std::cout << "Paging RR" << std::endl;
         coreVector[i].thread =
             new std::thread(&Scheduler::runPagingRR, this, i);
       }

@@ -21,7 +21,6 @@ MemoryManager::MemoryManager(int maxMemory, int frameSize,
   for (int i = 1; i <= numFrames; i++) {
 
     Frame newFrame = {nullptr, "", -1, 0};
-    std::cout << "Frame: " << i << std::endl;
     processFrameMap.insert({i, newFrame});
     freeFrameList.push_back(i);
   }
@@ -140,19 +139,19 @@ bool MemoryManager::pagingDeallocate(Process *process) {
 }
 
 void MemoryManager::writeBackingStore(Process *process) {
-  std::cout << "IM GETTING TRIGGERED!";
   std::string fileName = "backing_store.txt";
   std::ofstream file;
 
-  file.open(fileName, std::ios::out);
+  // Open the file in append mode
+  file.open(fileName, std::ios::out | std::ios::app);
 
   if (!file) {
-    std::cerr << "Could not open file!";
+    std::cerr << "Could not open file!" << std::endl;
+  } else {
+    file << "\n"; // Optional: add a newline before writing
+    file << process->getProcessName() << "\t";
+    file << process->getInstructionsDone() << std::endl;
   }
-
-  file << "\n";
-  file << process->getProcessName() << "\t";
-  file << process->getInstructionsDone();
 
   file.close();
 }
