@@ -35,6 +35,9 @@ public:
   void visualizeFrames();
 
   void VisualizeMemory();
+
+  void writeBackingStore(Process *process);
+
   int maxMemory;
   int frameSize;
   int minMemoryPerProcess;

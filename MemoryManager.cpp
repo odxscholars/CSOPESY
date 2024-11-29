@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
@@ -136,6 +137,24 @@ bool MemoryManager::pagingDeallocate(Process *process) {
   }
 
   return true;
+}
+
+void MemoryManager::writeBackingStore(Process *process) {
+  std::string fileName = "backing_store.txt";
+
+  std::ofstream file;
+
+  file.open(fileName);
+
+  if (!file) {
+    std::cerr << "Could not open file!";
+  }
+
+  file << "\n";
+  file << process->getProcessName();
+  file << process->getInstructionsDone();
+
+  file.close();
 }
 
 bool MemoryManager::isProcessinPagingMemory(Process *process) {

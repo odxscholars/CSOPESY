@@ -185,6 +185,7 @@ void Scheduler::runRR(int cpuIndex) {
       coreVector[cpuIndex].process = nullptr;
       coreVector[cpuIndex].state = CoreState::IDLE;
       memoryManager.deallocateMemory(currentProcess->getProcessName());
+      memoryManager.writeBackingStore(currentProcess);
       finishedProcesses.push_back(currentProcess);
       currentProcess = nullptr;
     } else {
@@ -301,9 +302,9 @@ void Scheduler::startThreads() {
   // Start the thread for generating dummy processes
   generateThread = std::thread(&Scheduler::generateDummyProcesses, this);
   generateThread.detach();
-  /*std::thread taskManagerThread(&Scheduler::taskManager, this);*/
+  std::thread taskManagerThread(&Scheduler::taskManager, this);
   std::thread reportGenerator(&Scheduler::generateReportPerCycle, this);
-  /*taskManagerThread.detach();*/
+  taskManagerThread.detach();
   reportGenerator.detach();
 }
 
